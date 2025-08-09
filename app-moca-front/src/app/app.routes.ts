@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { TestEditorComponent } from './components/test-editor/test-editor.component';
 import { QuestionEditorComponent } from './components/question-editor/question-editor.component';
+import { PatientControlComponent } from './components/patient-control/patient-control.component';
 
 export const routes: Routes = [
   {
@@ -12,17 +13,21 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: 'login',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'pruebas',
     component: TestEditorComponent,
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: 'preguntas',
     component: QuestionEditorComponent,
-    pathMatch: 'full'
-  }
-
+    pathMatch: 'full',
+  },
+  {
+    path: 'seguimiento-control',
+    component: PatientControlComponent,
+    pathMatch: 'full',
+  },
 ];
