@@ -5,7 +5,7 @@
   --white: #ffffff;
 }
 
-.btnReed {
+.btnRed {
   background-color: var(--red);
   padding: 6px;
   border-radius: 8px;
@@ -33,16 +33,100 @@
   padding: 0;
 }
 
-.headerCard{
-    background-color: var(--green);
-    min-height: 70px;
-    display: flex;
-    align-items: center;
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
+.headerCard {
+  background-color: var(--green);
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+/* styles.css */
+
+/* Estilo general para la tabla */
+.table-custom {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  border-top-left-radius: 8px; /* esquinas redondeadas */
+  border-top-right-radius: 8px;
+  overflow: hidden; /* para que el borde redondeado se aplique bien */
+  background-color: white;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1); /* opcional, efecto sutil */
 
 }
 
-h1{
-    font-size: 1.5rem;;
+.modal-header.modalCustom {
+  border-bottom: none !important;
+  background-color: var(--green);
+  min-height: 60px !important;
+  padding-left: 0px !important;
+}
+
+.modal-content.modalCustom {
+  padding: 0 !important;
+}
+
+.modal-content {
+  --bs-modal-border-width: 0;
+}
+
+
+
+
+/* Encabezado */
+.table-custom thead {
+  background-color: var(--green); /* Verde */
+  color: white;
+}
+
+.table-custom thead th {
+  padding: 10px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* Filas */
+.table-custom tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.table-custom tbody td {
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* Hover en filas */
+.table-custom tbody tr:hover {
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+/* Scrollbar personalizado (verde) */
+.table-custom::-webkit-scrollbar {
+  height: 8px; /* grosor horizontal */
+}
+
+.table-custom::-webkit-scrollbar-track {
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+.table-custom::-webkit-scrollbar-thumb {
+  background: #008050;
+  border-radius: 4px;
+}
+
+.table-custom::-webkit-scrollbar-thumb:hover {
+  background: #00663d;
+}
+
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
 }
