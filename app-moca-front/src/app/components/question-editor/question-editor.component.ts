@@ -1,30 +1,54 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TabsComponent } from '../tabs/tabs.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ActivatedRoute } from '@angular/router';
+import { QuestionService } from '../../services/question.service';
+import { Question } from '../../models/Question';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-question-editor',
-  imports: [TabsComponent],
-  standalone:true,
+  imports: [TabsComponent, CommonModule,FormsModule],
+  standalone: true,
   templateUrl: './question-editor.component.html',
-  styleUrl: './question-editor.component.css'
+  styleUrl: './question-editor.component.css',
 })
-export class QuestionEditorComponent {
+export class QuestionEditorComponent implements OnInit {
+  testId!: number;
+  questions: Question[] = [];
+  newQuestion: Question = { question: '', description: '', test: {id:this.testId} };
+  idAux: number = 0;
+  mode: 'create' | 'edit' = 'create';
 
-  constructor(private modal: NgbModal){};
+  constructor(
+    private modal: NgbModal,
+    private route: ActivatedRoute,
+    private questionService: QuestionService
+  ) {}
 
-   closeResult: string = '';
+  ngOnInit(): void {
+    this.testId = Number(this.route.snapshot.paramMap.get('id'));
+    this.getAllQuestions();
+  }
+  closeResult: string = '';
 
-
-    open(content: any) {
-    
+  open(content: any, question?: Question) {
+    if (question && question.id) {
+      this.idAux = question.id;
+      this.newQuestion = { ...question };
+      this.mode = 'edit';
+    } else {
+      this.mode = 'create';
+      this.idAux = 0;
+      this.newQuestion = { question: '', description: '', test: { id:this.testId }};
+    }
 
     this.modal
       .open(content, { size: 'md', ariaLabelledBy: 'modal-basic-title' })
       .result.then(
         (result) => {
           this.closeResult = `Closed with:${result} `;
-        
         },
         (reason = close) => {
           this.closeResult = 'Dismissed';
@@ -32,4 +56,52 @@ export class QuestionEditorComponent {
       );
   }
 
+  getAllQuestions(): void {
+    this.questionService.getAllByTestId(this.testId).subscribe({
+      next: (data) => {
+        this.questions = data;
+      },
+      error: (err) => {
+        console.error('Error cargando preguntas', err);
+      },
+    });
+  }
+
+
+   createQuestion(): void {
+    if (this.mode === 'create') {
+      this.newQuestion.test.id = this.testId 
+      this.questionService.create(this.newQuestion).subscribe({
+        next: () => {
+          this.getAllQuestions();
+          this.newQuestion = { question: '', description: '', test: {id:this.testId} };
+          this.modal.dismissAll();
+        },
+        error: (err) => console.error('Error al crear pregunta:', err),
+      });
+    } else if (this.mode === 'edit' && this.idAux) {
+      this.questionService.update(this.idAux, this.newQuestion).subscribe({
+        next: () => {
+          this.getAllQuestions();
+          this.newQuestion = { question: '', description: '', test:{ id:this.testId} };
+          this.idAux = 0;
+          this.modal.dismissAll();
+        },
+        error: (err) => console.error('Error al actualizar pregunta:', err),
+      });
+    }
+  }
+
+
+
+  deleteQuestion(id: number): void {
+    this.questionService.delete(id).subscribe({
+      next: () => {
+        this.getAllQuestions();
+        this.idAux = 0;
+        this.modal.dismissAll();
+      },
+      error: (err) => console.error('Error al eliminar pregunta:', err),
+    });
+  }
 }

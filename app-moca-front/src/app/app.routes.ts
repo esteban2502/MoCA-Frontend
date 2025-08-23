@@ -21,7 +21,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'preguntas',
+    path: 'preguntas/:id',
     component: QuestionEditorComponent,
     pathMatch: 'full',
   },
