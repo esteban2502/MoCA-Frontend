@@ -3,6 +3,7 @@ import { LoginComponent } from './components/login/login.component';
 import { TestEditorComponent } from './components/test-editor/test-editor.component';
 import { QuestionEditorComponent } from './components/question-editor/question-editor.component';
 import { PatientControlComponent } from './components/patient-control/patient-control.component';
+import { EvaluationComponent } from './components/evaluation/evaluation.component';
 
 export const routes: Routes = [
   {
@@ -30,4 +31,9 @@ export const routes: Routes = [
     component: PatientControlComponent,
     pathMatch: 'full',
   },
+  {
+    path: 'evaluacion',
+    component: EvaluationComponent,
+    pathMatch: 'full',
+  }
 ];

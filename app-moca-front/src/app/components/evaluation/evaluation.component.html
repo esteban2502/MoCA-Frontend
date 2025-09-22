@@ -1,0 +1,72 @@
+<app-tabs></app-tabs>
+<div class="container mt-5">
+  <div class="row">
+    <h1 class="col-12 col-md-8">Evaluación</h1>
+    <div class="col-12 col-md-4">
+      <div class="d-flex justify-content-end">
+        <button
+          ngbTooltip="Selecciona el examen que deseas aplicar"
+          class="btnGreen"
+          (click)="open(watchTest)"
+        >
+          Aplicar
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive mt-2">
+      <table class="table-custom">
+        <thead class="">
+          <tr>
+            <th scope="col">Acciones</th>
+            <th scope="col"># Identificación</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Evaluación</th>
+            <th scope="col">Puntaje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<ng-template #watchTest let-modal>
+  <div watchTest class="modal-content modalCustom">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header modalCustom">
+        <span><img src="/logo-blanco.png" alt="" width="110px" /></span>
+        <button
+          type="button"
+          (click)="modal.close('Close click')"
+          class="btn-close"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body modal-exams">
+        <h6 class="text-muted mb-4">Selecciona un examen para aplicar</h6>
+
+        <div
+          class="exam-list modal-exams-list"
+          infiniteScroll
+          [infiniteScrollDistance]="1"
+          [infiniteScrollThrottle]="300"
+          (scrolled)="loadMore()"
+        >
+          <div
+            class="exam-item d-flex justify-content-between align-items-center"
+            *ngFor="let exam of testList"
+          >
+            <span class="exam-title">{{ exam.title }}</span>
+            <button class="btn-apply">Aplicar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

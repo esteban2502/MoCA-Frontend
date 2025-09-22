@@ -4,7 +4,13 @@
     <h1 class="col-12 col-md-4">Configuración de Pruebas</h1>
     <div class="col-12 col-md-8">
       <div class="d-flex justify-content-end">
-        <button (click)="open(newEntity)" class="btnGreen">Crear</button>
+        <button
+          (click)="open(newEntity)"
+          ngbTooltip="Crear una nueva prueba"
+          class="btnGreen"
+        >
+          Crear
+        </button>
       </div>
     </div>
 
@@ -19,10 +25,15 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let test of testList">
+          <tr
+            *ngFor="
+              let test of testList
+                | paginate : { itemsPerPage: itemsPerPage, currentPage: p }
+            "
+          >
             <td>
               <div
-                class="d-flex justify-content-center gap-2 align-items-center"
+                class="d-flex justify-content-center gap-md-2 p-md-0 p-4 align-items-center"
               >
                 <div class="form-check form-switch">
                   <input
@@ -32,15 +43,21 @@
                     id="switchCheckChecked"
                     [(ngModel)]="test.status"
                     (change)="changeStatus(test.id!)"
+                    ngbTooltip="Cambiar estado de la prueba"
                   />
                 </div>
-                <button [routerLink]="['/preguntas', test.id]" class="btn btn-success btn-circle">
+                <button
+                  [routerLink]="['/preguntas', test.id]"
+                  ngbTooltip="Ver preguntas asociadas a esta prueba"
+                  class="btn btn-success btn-circle"
+                >
                   <i class="bi bi-question-lg"></i>
                 </button>
 
                 <button
                   class="btn btn-success btn-circle"
                   (click)="open(newEntity, test)"
+                  ngbTooltip="Editar información de la prueba"
                 >
                   <i class="bi bi-pencil-square"></i>
                 </button>
@@ -48,6 +65,7 @@
                 <button
                   class="btn-circle btn btn-danger d-flex align-items-center justify-content-center"
                   (click)="open(deleteEntity, test)"
+                  ngbTooltip="Eliminar esta prueba"
                 >
                   <i class="bi bi-trash3"></i>
                 </button>
@@ -55,10 +73,18 @@
             </td>
             <td>{{ test.title }}</td>
             <td class="text-wraper">{{ test.description }}</td>
-            <td>{{test.numQuestions}}</td>
+            <td>{{ test.numQuestions }}</td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <div class="d-flex justify-content-end mt-3">
+      <pagination-controls
+        (pageChange)="p = $event"
+        previousLabel=""
+        nextLabel=""
+        [maxSize]="5"
+      ></pagination-controls>
     </div>
   </div>
 </div>

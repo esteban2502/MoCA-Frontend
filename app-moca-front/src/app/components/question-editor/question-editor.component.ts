@@ -1,15 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { TabsComponent } from '../tabs/tabs.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
 import { QuestionService } from '../../services/question.service';
 import { Question } from '../../models/Question';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
   selector: 'app-question-editor',
-  imports: [TabsComponent, CommonModule,FormsModule],
+  imports: [
+    TabsComponent,
+    CommonModule,
+    FormsModule,
+    NgbTooltipModule,
+    NgxPaginationModule,
+  ],
   standalone: true,
   templateUrl: './question-editor.component.html',
   styleUrl: './question-editor.component.css',
@@ -17,7 +24,11 @@ import { FormsModule } from '@angular/forms';
 export class QuestionEditorComponent implements OnInit {
   testId!: number;
   questions: Question[] = [];
-  newQuestion: Question = { question: '', description: '', test: {id:this.testId} };
+  newQuestion: Question = {
+    question: '',
+    description: '',
+    test: { id: this.testId },
+  };
   idAux: number = 0;
   mode: 'create' | 'edit' = 'create';
 
@@ -33,6 +44,9 @@ export class QuestionEditorComponent implements OnInit {
   }
   closeResult: string = '';
 
+  itemsPerPage: number = 1; 
+  p: number = 1;
+
   open(content: any, question?: Question) {
     if (question && question.id) {
       this.idAux = question.id;
@@ -41,7 +55,11 @@ export class QuestionEditorComponent implements OnInit {
     } else {
       this.mode = 'create';
       this.idAux = 0;
-      this.newQuestion = { question: '', description: '', test: { id:this.testId }};
+      this.newQuestion = {
+        question: '',
+        description: '',
+        test: { id: this.testId },
+      };
     }
 
     this.modal
@@ -67,14 +85,17 @@ export class QuestionEditorComponent implements OnInit {
     });
   }
 
-
-   createQuestion(): void {
+  createQuestion(): void {
     if (this.mode === 'create') {
-      this.newQuestion.test.id = this.testId 
+      this.newQuestion.test.id = this.testId;
       this.questionService.create(this.newQuestion).subscribe({
         next: () => {
           this.getAllQuestions();
-          this.newQuestion = { question: '', description: '', test: {id:this.testId} };
+          this.newQuestion = {
+            question: '',
+            description: '',
+            test: { id: this.testId },
+          };
           this.modal.dismissAll();
         },
         error: (err) => console.error('Error al crear pregunta:', err),
@@ -83,7 +104,11 @@ export class QuestionEditorComponent implements OnInit {
       this.questionService.update(this.idAux, this.newQuestion).subscribe({
         next: () => {
           this.getAllQuestions();
-          this.newQuestion = { question: '', description: '', test:{ id:this.testId} };
+          this.newQuestion = {
+            question: '',
+            description: '',
+            test: { id: this.testId },
+          };
           this.idAux = 0;
           this.modal.dismissAll();
         },
@@ -91,8 +116,6 @@ export class QuestionEditorComponent implements OnInit {
       });
     }
   }
-
-
 
   deleteQuestion(id: number): void {
     this.questionService.delete(id).subscribe({

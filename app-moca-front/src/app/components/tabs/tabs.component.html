@@ -1,13 +1,20 @@
-<div class="container-fluid bg-light px-0">
-  <div class="row g-2 g-md-0">
-    <div class="col-12 col-md text-center">
-      <button [routerLink]="['/pruebas']" class="tab-button w-100">Configuración de Pruebas</button>
-    </div>
-    <div class="col-12 col-md text-center">
-      <button [routerLink]="['/seguimiento-control']" class="tab-button w-100">Seguimiento y Control</button>
-    </div>
-    <div class="col-12 col-md text-center">
-      <button class="tab-button w-100">Evaluación</button>
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-0">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#"></a>
+
+    <!-- Botón hamburguesa -->
+    <button class="navbar-toggler" type="button" (click)="isCollapsed = !isCollapsed" 
+            aria-controls="navbarTabs" aria-expanded="!isCollapsed" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Contenedor colapsable -->
+    <div [ngbCollapse]="isCollapsed" class="navbar-collapse" id="navbarTabs">
+      <div class="navbar-nav w-100 d-flex flex-column flex-md-row text-center">
+        <button [routerLink]="['/pruebas']" class="tab-button w-100 m-1">Configuración de Pruebas</button>
+        <button [routerLink]="['/seguimiento-control']" class="tab-button w-100 m-1">Seguimiento y Control</button>
+        <button [routerLink]="['/evaluacion']" class="tab-button w-100 m-1">Evaluación</button>
+      </div>
     </div>
   </div>
-</div>
+</nav>

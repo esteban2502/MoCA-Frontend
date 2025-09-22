@@ -6,10 +6,19 @@ import { Test } from '../../models/Test';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
   selector: 'app-test-editor',
-  imports: [TabsComponent, CommonModule, FormsModule,RouterLink],
+  imports: [
+    TabsComponent,
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    NgbTooltipModule,
+    NgxPaginationModule,
+  ],
   standalone: true,
   templateUrl: './test-editor.component.html',
   styleUrl: './test-editor.component.css',
@@ -26,6 +35,8 @@ export class TestEditorComponent implements OnInit {
     this.getAllTests();
   }
   closeResult: string = '';
+  itemsPerPage: number = 1; 
+  p: number = 1;
 
   getAllTests() {
     this.testService.getAll().subscribe({

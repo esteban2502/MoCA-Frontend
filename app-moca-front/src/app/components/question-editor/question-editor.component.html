@@ -4,7 +4,13 @@
     <h1 class="col-12 col-md-8">Configuración de Preguntas</h1>
     <div class="col-12 col-md-4">
       <div class="d-flex justify-content-end">
-        <button (click)="open(newEntity)" class="btnGreen">Crear</button>
+        <button
+          (click)="open(newEntity)"
+          ngbTooltip="Crear una nueva pregunta"
+          class="btnGreen"
+        >
+          Crear
+        </button>
       </div>
     </div>
 
@@ -19,17 +25,20 @@
           </tr>
         </thead>
         <tbody>
-           <tr *ngFor="let test of questions">
+          <tr
+            *ngFor="
+              let test of questions
+                | paginate : { itemsPerPage: itemsPerPage, currentPage: p }
+            "
+          >
             <td>
               <div
                 class="d-flex justify-content-center gap-2 align-items-center"
               >
-               
-              
-
                 <button
                   class="btn btn-success btn-circle"
                   (click)="open(newEntity, test)"
+                  ngbTooltip="Editar información de la pregunta"
                 >
                   <i class="bi bi-pencil-square"></i>
                 </button>
@@ -37,6 +46,7 @@
                 <button
                   class="btn-circle btn btn-danger d-flex align-items-center justify-content-center"
                   (click)="open(deleteEntity, test)"
+                  ngbTooltip="Eliminar esta pregunta"
                 >
                   <i class="bi bi-trash3"></i>
                 </button>
@@ -49,9 +59,16 @@
         </tbody>
       </table>
     </div>
+    <div class="d-flex justify-content-end mt-3">
+      <pagination-controls
+        (pageChange)="p = $event"
+        previousLabel=""
+        nextLabel=""
+        [maxSize]="5"
+      ></pagination-controls>
+    </div>
   </div>
 </div>
-
 
 <ng-template #newEntity let-modal>
   <div newEntity class="modal-content modalCustom">
@@ -120,9 +137,7 @@
           aria-label="Close"
         ></button>
       </div>
-      <div class="modal-body">
-        Al confirmar, la pregunta será eliminada.
-      </div>
+      <div class="modal-body">Al confirmar, la pregunta será eliminada.</div>
 
       <div class="d-flex justify-content-end gap-2 mb-3 px-3">
         <button

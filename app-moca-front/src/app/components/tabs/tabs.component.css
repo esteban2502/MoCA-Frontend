@@ -16,3 +16,28 @@
   outline: none;
   box-shadow: none;
 }
+
+
+.navbar-collapse {
+  background-color: transparent; /* nada de blanco */
+  box-shadow: none; /* sin sombra */
+  padding: 0;
+  margin-top: 0;
+}
+
+.navbar-nav .tab-button {
+  background-color: var(--green);
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 10px 0;
+  margin: 0.25rem 0; /* separa verticalmente los botones */
+  border-radius: 6px; /* redondeado elegante */
+  width: 100%;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.navbar-nav .tab-button:hover {
+  background-color: #00663f;
+  transform: translateY(-1px);
+}

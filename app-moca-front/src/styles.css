@@ -153,3 +153,99 @@ h1 {
   textarea{
     resize: none;
   }
+
+.tooltip-inner {
+  background: rgba(255, 255, 255, 0.75); /* vidrio translúcido */
+  backdrop-filter: blur(10px) saturate(180%); 
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  color: #111;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* sombra suave más Apple */
+  border: 1px solid rgba(255, 255, 255, 0.5); /* borde sutil, vidrio real */
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
+.tooltip-arrow::before {
+  border-top-color: rgba(255, 255, 255, 0.75) !important; /* flecha visible */
+  backdrop-filter: blur(10px);
+}
+
+
+/*PAGINACION*/
+
+/* Reset de estilos por defecto */
+.ngx-pagination {
+  padding: 0.5rem 0;
+  margin: 0;
+}
+
+.ngx-pagination li {
+  list-style: none;
+  background: none !important;
+  padding: 0;
+  margin: 2px;
+  border: none;
+}
+
+/* Botones de paginación estilo vidrio puro */
+/* Botones no seleccionados (links) con vidrio */
+.ngx-pagination li a {
+  background: rgba(255, 255, 255, 0.05); /* vidrio transparente */
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #111;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+
+/* Hover */
+.ngx-pagination li a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #007aff;
+  transform: scale(1.05);
+}
+
+/* Botón activo */
+.ngx-pagination li.current span {
+  background: rgba(255, 255, 255, 0.2); /* ligeramente más visible */
+  color: #007aff !important;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 122, 255, 0.15);
+  transform: scale(1.05);
+}
+
+/* Deshabilitado */
+.ngx-pagination li.disabled span {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+}
+
+/* Flechas */
+.ngx-pagination li a[aria-label*="Previous"],
+.ngx-pagination li a[aria-label*="Next"] {
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
