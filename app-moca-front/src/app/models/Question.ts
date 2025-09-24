@@ -1,3 +1,4 @@
+import { CategoryOnlyId } from "./CategoryOnlyId";
 import { TestOnlyId } from "./TestOnlyId";
 
 export interface Question {
@@ -5,4 +6,6 @@ export interface Question {
   question: string;
   description: string;
   test: TestOnlyId;
+  category: CategoryOnlyId;
+
 }

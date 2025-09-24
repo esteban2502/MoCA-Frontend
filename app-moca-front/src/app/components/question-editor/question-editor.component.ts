@@ -7,6 +7,8 @@ import { Question } from '../../models/Question';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { Category } from '../../models/Category';
+import { CategoryService } from '../../services/category.service';
 
 @Component({
   selector: 'app-question-editor',
@@ -28,6 +30,7 @@ export class QuestionEditorComponent implements OnInit {
     question: '',
     description: '',
     test: { id: this.testId },
+    category: { id: 0 }
   };
   idAux: number = 0;
   mode: 'create' | 'edit' = 'create';
@@ -35,17 +38,28 @@ export class QuestionEditorComponent implements OnInit {
   constructor(
     private modal: NgbModal,
     private route: ActivatedRoute,
-    private questionService: QuestionService
+    private questionService: QuestionService,
+    private categoryService: CategoryService
   ) {}
 
   ngOnInit(): void {
     this.testId = Number(this.route.snapshot.paramMap.get('id'));
     this.getAllQuestions();
+    this.loadCategories();
   }
   closeResult: string = '';
 
-  itemsPerPage: number = 1; 
+  itemsPerPage: number = 8;
   p: number = 1;
+
+  categories: Category[] = [];
+
+  loadCategories(): void {
+    this.categoryService.getAllCategories().subscribe({
+      next: (data) => (this.categories = data),
+      error: (err) => console.error('Error cargando categorías', err),
+    });
+  }
 
   open(content: any, question?: Question) {
     if (question && question.id) {
@@ -59,6 +73,7 @@ export class QuestionEditorComponent implements OnInit {
         question: '',
         description: '',
         test: { id: this.testId },
+        category: { id: 0 }
       };
     }
 
@@ -95,6 +110,7 @@ export class QuestionEditorComponent implements OnInit {
             question: '',
             description: '',
             test: { id: this.testId },
+            category: { id: 0 }
           };
           this.modal.dismissAll();
         },
@@ -108,6 +124,7 @@ export class QuestionEditorComponent implements OnInit {
             question: '',
             description: '',
             test: { id: this.testId },
+            category: { id: 0 }
           };
           this.idAux = 0;
           this.modal.dismissAll();

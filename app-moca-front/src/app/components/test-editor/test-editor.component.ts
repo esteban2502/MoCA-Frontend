@@ -35,7 +35,7 @@ export class TestEditorComponent implements OnInit {
     this.getAllTests();
   }
   closeResult: string = '';
-  itemsPerPage: number = 1; 
+  itemsPerPage: number = 5; 
   p: number = 1;
 
   getAllTests() {

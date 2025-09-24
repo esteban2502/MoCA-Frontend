@@ -21,13 +21,13 @@
             <th scope="col">Acciones</th>
             <th scope="col">Pregunta</th>
             <th scope="col">Descripción</th>
-            <th scope="col">Tipo</th>
+            <th scope="col">Categoría</th>
           </tr>
         </thead>
         <tbody>
           <tr
             *ngFor="
-              let test of questions
+              let q of questions
                 | paginate : { itemsPerPage: itemsPerPage, currentPage: p }
             "
           >
@@ -37,7 +37,7 @@
               >
                 <button
                   class="btn btn-success btn-circle"
-                  (click)="open(newEntity, test)"
+                  (click)="open(newEntity, q)"
                   ngbTooltip="Editar información de la pregunta"
                 >
                   <i class="bi bi-pencil-square"></i>
@@ -45,16 +45,16 @@
 
                 <button
                   class="btn-circle btn btn-danger d-flex align-items-center justify-content-center"
-                  (click)="open(deleteEntity, test)"
+                  (click)="open(deleteEntity, q)"
                   ngbTooltip="Eliminar esta pregunta"
                 >
                   <i class="bi bi-trash3"></i>
                 </button>
               </div>
             </td>
-            <td>{{ test.question }}</td>
-            <td class="text-wraper">{{ test.description }}</td>
-            <td></td>
+            <td>{{ q.question }}</td>
+            <td class="text-wraper">{{ q.description }}</td>
+            <td class="text-wraper">{{ q.category.name }}</td>
           </tr>
         </tbody>
       </table>
@@ -103,6 +103,22 @@
               type="text"
               rows="4"
             ></textarea>
+          </div>
+
+          <label for="category">Categoría</label>
+          <div class="col-12 mb-3">
+            <select
+              id="category"
+              class="form-select"
+              [(ngModel)]="newQuestion.category.id"
+            >
+              <option [ngValue]="null" disabled selected>
+                Seleccione una categoría
+              </option>
+              <option *ngFor="let cat of categories" [ngValue]="cat.id">
+                {{ cat.name }}
+              </option>
+            </select>
           </div>
         </div>
       </div>
