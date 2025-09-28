@@ -41,7 +41,7 @@
       <div class="test-info">
         <div class="test-title">
           <span><img src="/logo-ucp.png" alt="" width="50px" /></span>
-          <h1>{{ currentQuestion.test.title }}</h1>
+          <h1>{{ test.title }}</h1>
           <span class="test-subtitle">Evaluación Cognitiva</span>
         </div>
       </div>
@@ -117,11 +117,11 @@
                   type="number" 
                   class="score-input"
                   [(ngModel)]="evaluationScore"
-                  min="0"
-                  max="10"
+                  [min]="0"
+                  [max]="maxScore"
                   placeholder="0"
                 />
-                <span class="score-max">/ 10</span>
+                <span class="score-max">/ {{ maxScore }}</span>
               </div>
             </div>
 
@@ -148,7 +148,7 @@
   <footer class="test-footer">
     <div class="footer-content">
       <div class="footer-left">
-        <button class="btn-secondary" (click)="previousQuestion()" [disabled]="currentQuestionNumber <= 1">
+        <button class="btn-secondary" (click)="previousQuestion()" [disabled]="!canGoPrevious">
           <i class="fas fa-chevron-left"></i>
           <span>Anterior</span>
         </button>
@@ -158,7 +158,7 @@
       
       <div class="footer-right">
         <button class="btn-primary" (click)="submitAnswer()">
-          <span>Siguiente</span>
+          <span>{{ canGoNext ? 'Siguiente' : 'Finalizar' }}</span>
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>

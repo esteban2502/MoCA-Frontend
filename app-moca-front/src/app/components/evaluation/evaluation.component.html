@@ -65,7 +65,7 @@
             *ngFor="let exam of testList"
           >
             <span class="exam-title">{{ exam.title }}</span>
-            <button class="btn-apply">Aplicar</button>
+            <button class="btn-apply" (click)="startTest(exam.id!)">Aplicar</button>
           </div>
         </div>
       </div>

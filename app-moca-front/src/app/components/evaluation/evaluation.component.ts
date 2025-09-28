@@ -3,6 +3,7 @@ import { TabsComponent } from '../tabs/tabs.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
 import { TestService } from '../../services/test.service';
 import { Test } from '../../models/Test';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
@@ -16,7 +17,11 @@ import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 })
 export class EvaluationComponent implements OnInit {
   closeResult: string = '';
-  constructor(private modal: NgbModal, private testService: TestService) {}
+  constructor(
+    private modal: NgbModal, 
+    private testService: TestService,
+    private router: Router
+  ) {}
 
   pageSize = 5;
   displayedExams: Test[] = [];
@@ -56,5 +61,10 @@ export class EvaluationComponent implements OnInit {
           this.closeResult = 'Dismissed';
         }
       );
+  }
+
+  startTest(testId: number) {
+    this.modal.dismissAll();
+    this.router.navigate(['/moca-test', testId]);
   }
 }
