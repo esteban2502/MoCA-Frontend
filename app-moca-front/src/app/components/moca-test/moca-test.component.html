@@ -1,0 +1,128 @@
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-container">
+  <div class="loading-content">
+    <div class="moca-logo">
+      <div class="logo-circle">
+        <span class="logo-text">MoCA</span>
+      </div>
+    </div>
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+    <p class="loading-text">Cargando prueba...</p>
+  </div>
+</div>
+
+<!-- Error State -->
+<div *ngIf="errorMessage" class="error-container">
+  <div class="error-content">
+    <div class="error-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h2>Error al cargar la prueba</h2>
+    <p>{{ errorMessage }}</p>
+    <button class="btn-retry" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i>
+      Volver al inicio
+    </button>
+  </div>
+</div>
+
+<!-- Main Test Content -->
+<div *ngIf="!isLoading && !errorMessage" class="test-container">
+  <!-- Header -->
+  <header class="test-header">
+    <div class="header-content">
+      <button class="btn-exit" (click)="goBack()">
+        <i class="fas fa-times"></i>
+        <span>Salir</span>
+      </button>
+       
+      <div class="test-info">
+        <div class="test-title">
+          <h1>{{ currentQuestion.test.title }}</h1>
+          <span class="test-subtitle">Evaluación Cognitiva</span>
+        </div>
+      </div>
+      
+      <div class="test-controls">
+       
+        <div class="progress-info">
+          <span class="question-counter">{{ currentQuestionNumber }}/{{ totalQuestions }}</span>
+        </div>
+      </div>
+    </div>
+    
+   
+  </header>
+
+  <!-- Main Content -->
+  <main class="test-main">
+    <div class="question-container">
+      <!-- Question Header -->
+      <div class="question-header">
+        <div class="question-meta">
+          <span class="question-number">Pregunta {{ currentQuestion.questionOrder }}</span>
+          <span class="question-category">{{ currentQuestion.category.name }}</span>
+        </div>
+      </div>
+
+      <!-- Question Content -->
+      <div class="question-content">
+        <div class="question-text">
+          <h2 class="question-title">{{ currentQuestion.question }}</h2>
+          <p *ngIf="currentQuestion.description" class="question-instructions">
+            {{ currentQuestion.description }}
+          </p>
+        </div>
+
+        <!-- Answer Area -->
+        <div class="answer-area">
+          <div class="answer-section">
+            <label class="answer-label">
+              <i class="fas fa-edit"></i>
+              <span>Su respuesta</span>
+            </label>
+            
+            <div class="answer-input-container">
+              <textarea 
+                class="answer-textarea"
+                [(ngModel)]="userAnswer"
+                placeholder="Escriba su respuesta aquí..."
+                rows="8"
+              ></textarea>
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="test-footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <button class="btn-secondary" (click)="previousQuestion()" [disabled]="currentQuestionNumber <= 1">
+          <i class="fas fa-chevron-left"></i>
+          <span>Anterior</span>
+        </button>
+      </div>
+      
+      <div class="footer-center">
+        <div class="test-status">
+          <i class="fas fa-check-circle"></i>
+          <span>Progreso guardado</span>
+        </div>
+      </div>
+      
+      <div class="footer-right">
+        <button class="btn-primary" (click)="submitAnswer()">
+          <span>Siguiente</span>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </footer>
+</div>

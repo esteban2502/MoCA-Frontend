@@ -1,17 +1,5 @@
 <app-tabs></app-tabs>
 <div class="container mt-5">
-  <!-- Alerta de error elegante -->
-  <div *ngIf="showError" class="alert alert-warning alert-dismissible fade show custom-alert" role="alert">
-    <div class="d-flex align-items-center">
-      <i class="fas fa-exclamation-triangle me-3"></i>
-      <div class="flex-grow-1">
-        <strong>¡Atención!</strong>
-        <p class="mb-0 mt-1">{{ errorMessage }}</p>
-      </div>
-      <button type="button" class="btn-close" (click)="hideError()" aria-label="Close"></button>
-    </div>
-  </div>
-
   <div class="row">
     <h1 class="col-12 col-md-4">Configuración de Pruebas</h1>
     <div class="col-12 col-md-8">
