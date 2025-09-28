@@ -25,6 +25,10 @@ export class MocaTestComponent {
   timeRemaining = '15:30';
   userAnswer = '';
   
+  // Evaluation variables
+  evaluationScore: number | null = null;
+  evaluationNotes = '';
+  
   isLoading = false;
   errorMessage = '';
 
