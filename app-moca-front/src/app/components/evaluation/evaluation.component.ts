@@ -30,7 +30,8 @@ export class EvaluationComponent implements OnInit {
   getAllTests() {
     this.testService.getAll().subscribe({
       next: (data) => {
-        this.testList = data;
+        // Filtrar solo los exámenes con status true
+        this.testList = data.filter(test => test.status === true);
         this.loadMore();
       },
     });

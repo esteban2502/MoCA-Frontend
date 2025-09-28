@@ -58,6 +58,12 @@
           [infiniteScrollThrottle]="300"
           (scrolled)="loadMore()"
         >
+          <!-- Mensaje cuando no hay exámenes activos -->
+          <div *ngIf="testList.length === 0" class="text-center text-muted py-4">
+            <p>No hay exámenes activos disponibles en este momento.</p>
+          </div>
+          
+          <!-- Lista de exámenes activos -->
           <div
             class="exam-item d-flex justify-content-between align-items-center"
             *ngFor="let exam of testList"

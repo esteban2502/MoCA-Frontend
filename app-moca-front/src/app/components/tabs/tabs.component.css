@@ -1,3 +1,72 @@
+/* Navbar principal - fondo verde, más delgado */
+.navbar {
+  background-color: var(--green) !important;
+  padding: 4px 0 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Reducir padding en desktop */
+@media (min-width: 992px) {
+  .navbar {
+    padding: 2px 0 !important;
+  }
+}
+
+/* Botón hamburguesa elegante */
+.navbar-toggler {
+  border: none;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.navbar-toggler:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.navbar-toggler:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='1.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  width: 18px;
+  height: 18px;
+}
+
+/* Menú desplegable - minimalista y transparente */
+.navbar-collapse {
+  background-color: transparent;
+  border-radius: 0;
+  margin-top: 4px;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* Botones del menú - minimalistas y elegantes */
+.navbar-nav .tab-button {
+  background-color: var(--green);
+  color: white;
+  font-weight: 500;
+  border: none;
+  padding: 8px 16px;
+  margin: 1px 0;
+  border-radius: 4px;
+  width: 100%;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.navbar-nav .tab-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones regulares (no en menú hamburguesa) */
 .tab-button {
   background-color: var(--green);
   color: white;
@@ -15,29 +84,4 @@
 .tab-button:focus {
   outline: none;
   box-shadow: none;
-}
-
-
-.navbar-collapse {
-  background-color: transparent; /* nada de blanco */
-  box-shadow: none; /* sin sombra */
-  padding: 0;
-  margin-top: 0;
-}
-
-.navbar-nav .tab-button {
-  background-color: var(--green);
-  color: white;
-  font-weight: bold;
-  border: none;
-  padding: 10px 0;
-  margin: 0.25rem 0; /* separa verticalmente los botones */
-  border-radius: 6px; /* redondeado elegante */
-  width: 100%;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.navbar-nav .tab-button:hover {
-  background-color: #00663f;
-  transform: translateY(-1px);
 }

@@ -29,11 +29,13 @@ export class QuestionEditorComponent implements OnInit {
   newQuestion: Question = {
     question: '',
     description: '',
+    questionOrder: 1,
     test: { id: this.testId },
     category: { id: 0 }
   };
   idAux: number = 0;
   mode: 'create' | 'edit' = 'create';
+  errorMessage: string = '';
 
   constructor(
     private modal: NgbModal,
@@ -62,6 +64,7 @@ export class QuestionEditorComponent implements OnInit {
   }
 
   open(content: any, question?: Question) {
+    this.errorMessage = ''; // Limpiar mensaje de error
     if (question && question.id) {
       this.idAux = question.id;
       this.newQuestion = { ...question };
@@ -72,6 +75,7 @@ export class QuestionEditorComponent implements OnInit {
       this.newQuestion = {
         question: '',
         description: '',
+        questionOrder: 1,
         test: { id: this.testId },
         category: { id: 0 }
       };
@@ -101,6 +105,8 @@ export class QuestionEditorComponent implements OnInit {
   }
 
   createQuestion(): void {
+    this.errorMessage = ''; // Limpiar mensaje de error previo
+    
     if (this.mode === 'create') {
       this.newQuestion.test.id = this.testId;
       this.questionService.create(this.newQuestion).subscribe({
@@ -109,12 +115,20 @@ export class QuestionEditorComponent implements OnInit {
           this.newQuestion = {
             question: '',
             description: '',
+            questionOrder: 1,
             test: { id: this.testId },
             category: { id: 0 }
           };
           this.modal.dismissAll();
         },
-        error: (err) => console.error('Error al crear pregunta:', err),
+        error: (err) => {
+          if (err.status === 409) {
+            this.errorMessage = err.error || 'Ya existe una pregunta con este orden en el examen';
+          } else {
+            console.error('Error al crear pregunta:', err);
+            this.errorMessage = 'Error al crear la pregunta';
+          }
+        },
       });
     } else if (this.mode === 'edit' && this.idAux) {
       this.questionService.update(this.idAux, this.newQuestion).subscribe({
@@ -123,13 +137,21 @@ export class QuestionEditorComponent implements OnInit {
           this.newQuestion = {
             question: '',
             description: '',
+            questionOrder: 1,
             test: { id: this.testId },
             category: { id: 0 }
           };
           this.idAux = 0;
           this.modal.dismissAll();
         },
-        error: (err) => console.error('Error al actualizar pregunta:', err),
+        error: (err) => {
+          if (err.status === 409) {
+            this.errorMessage = err.error || 'Ya existe una pregunta con este orden en el examen';
+          } else {
+            console.error('Error al actualizar pregunta:', err);
+            this.errorMessage = 'Error al actualizar la pregunta';
+          }
+        },
       });
     }
   }
@@ -144,4 +166,6 @@ export class QuestionEditorComponent implements OnInit {
       error: (err) => console.error('Error al eliminar pregunta:', err),
     });
   }
+
+  
 }

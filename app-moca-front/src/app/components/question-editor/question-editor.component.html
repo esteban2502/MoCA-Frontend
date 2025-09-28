@@ -21,6 +21,7 @@
             <th scope="col">Acciones</th>
             <th scope="col">Pregunta</th>
             <th scope="col">Descripción</th>
+            <th scope="col">Orden</th>
             <th scope="col">Categoría</th>
           </tr>
         </thead>
@@ -54,6 +55,7 @@
             </td>
             <td>{{ q.question }}</td>
             <td class="text-wraper">{{ q.description }}</td>
+            <td class="text-wraper">{{ q.questionOrder}}</td>
             <td class="text-wraper">{{ q.category.name }}</td>
           </tr>
         </tbody>
@@ -87,6 +89,11 @@
         <div class="mb-2">
           <h1 *ngIf="mode === 'create'">Nueva Pregunta</h1>
           <h1 *ngIf="mode === 'edit'">Editar Pregunta</h1>
+          
+          <!-- Mensaje de error -->
+          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+            {{ errorMessage }}
+          </div>
           <label for="">Titulo</label>
           <div class="col-12 mb-3">
             <input
@@ -105,14 +112,27 @@
             ></textarea>
           </div>
 
+          <label for="questionOrder">Orden</label>
+          <div class="col-12 mb-3">
+            <input
+              id="questionOrder"
+              class="form-control"
+              [(ngModel)]="newQuestion.questionOrder"
+              type="number"
+              min="1"
+              placeholder="Ingrese el orden de la pregunta"
+            />
+          </div>
+
           <label for="category">Categoría</label>
           <div class="col-12 mb-3">
             <select
               id="category"
               class="form-select"
               [(ngModel)]="newQuestion.category.id"
+              [disabled]="mode === 'edit'"
             >
-              <option [ngValue]="null" disabled selected>
+              <option  [ngValue]="null" disabled selected>
                 Seleccione una categoría
               </option>
               <option *ngFor="let cat of categories" [ngValue]="cat.id">
