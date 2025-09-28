@@ -9,10 +9,11 @@ import { ResultService } from '../../services/result.service';
 import { Test } from '../../models/Test';
 import { Result } from '../../models/Result';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
   selector: 'app-evaluation',
-  imports: [TabsComponent, CommonModule, FormsModule, NgbTooltipModule,InfiniteScrollDirective ],
+  imports: [TabsComponent, CommonModule, FormsModule, NgbTooltipModule,InfiniteScrollDirective,NgxPaginationModule ],
   templateUrl: './evaluation.component.html',
   standalone: true,
   styleUrl: './evaluation.component.css',
@@ -36,6 +37,9 @@ export class EvaluationComponent implements OnInit {
     this.getAllTests();
     this.getAllResults();
   }
+
+  itemsPerPage: number = 5; 
+  p: number = 1;
 
   testList: Test[] = [];
 
