@@ -1,25 +1,22 @@
 <app-tabs></app-tabs>
 <div class="container mt-5">
-  <div class="row">
-    <h1 class="col-12 col-md-8">Evaluación</h1>
-    <div class="col-12 col-md-4">
-      <div class="d-flex justify-content-end">
-        <button
-          ngbTooltip="Selecciona el examen que deseas aplicar"
-          class="btnGreen"
-          (click)="open(watchTest)"
-        >
-          Aplicar
-        </button>
-      </div>
-    </div>
+  <div class="d-flex justify-content-between align-items-center my-3">
+    <h1 class="mb-0">Evaluación</h1>
+    <button
+      ngbTooltip="Selecciona el examen que deseas aplicar"
+      class="btnGreen"
+      (click)="open(watchTest)"
+    >
+      Aplicar
+    </button>
+  </div>
 
     <div class="table-responsive mt-2">
       <table class="table-custom">
         <thead class="">
           <tr>
             <th scope="col">Acciones</th>
-            <th scope="col"># Identificación</th>
+            <th scope="col">Identificación</th>
             <th scope="col">Nombre</th>
             <th scope="col">Evaluación</th>
             <th scope="col">Puntaje</th>
@@ -30,7 +27,6 @@
         </tbody>
       </table>
     </div>
-  </div>
 </div>
 
 <ng-template #watchTest let-modal>

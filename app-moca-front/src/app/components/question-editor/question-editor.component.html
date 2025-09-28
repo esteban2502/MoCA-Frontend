@@ -1,18 +1,15 @@
 <app-tabs></app-tabs>
 <div class="container mt-5">
-  <div class="row">
-    <h1 class="col-12 col-md-8">Configuración de Preguntas</h1>
-    <div class="col-12 col-md-4">
-      <div class="d-flex justify-content-end">
-        <button
-          (click)="open(newEntity)"
-          ngbTooltip="Crear una nueva pregunta"
-          class="btnGreen"
-        >
-          Crear
-        </button>
-      </div>
-    </div>
+  <div class="d-flex justify-content-between align-items-center my-3">
+    <h1 class="mb-0">Configuración de Preguntas</h1>
+    <button
+      (click)="open(newEntity)"
+      ngbTooltip="Crear una nueva pregunta"
+      class="btnGreen"
+    >
+      Crear
+    </button>
+  </div>
 
     <div class="table-responsive mt-2">
       <table class="table-custom">
@@ -71,7 +68,6 @@
         [maxSize]="5"
       ></pagination-controls>
     </div>
-  </div>
 </div>
 
 <ng-template #newEntity let-modal>
