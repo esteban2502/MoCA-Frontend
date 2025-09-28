@@ -22,6 +22,7 @@
             <th scope="col">Pregunta</th>
             <th scope="col">Descripción</th>
             <th scope="col">Orden</th>
+            <th scope="col">Puntaje Máximo</th>
             <th scope="col">Categoría</th>
           </tr>
         </thead>
@@ -56,6 +57,7 @@
             <td>{{ q.question }}</td>
             <td class="text-wraper">{{ q.description }}</td>
             <td class="text-wraper">{{ q.questionOrder}}</td>
+            <td class="text-wraper">{{ q.maxScore || 'N/A' }}</td>
             <td class="text-wraper">{{ q.category.name }}</td>
           </tr>
         </tbody>
@@ -121,6 +123,18 @@
               type="number"
               min="1"
               placeholder="Ingrese el orden de la pregunta"
+            />
+          </div>
+
+          <label for="maxScore">Puntaje Máximo</label>
+          <div class="col-12 mb-3">
+            <input
+              id="maxScore"
+              class="form-control"
+              [(ngModel)]="newQuestion.maxScore"
+              type="number"
+              min="1"
+              placeholder="Ingrese el puntaje máximo de la pregunta"
             />
           </div>
 

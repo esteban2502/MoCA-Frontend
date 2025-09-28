@@ -6,6 +6,7 @@ export interface Question {
   question: string;
   description: string;
   questionOrder?: number;
+  maxScore?: number;
   test: TestOnlyId;
   category: CategoryOnlyId;
 

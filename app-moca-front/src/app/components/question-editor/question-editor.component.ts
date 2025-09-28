@@ -30,6 +30,7 @@ export class QuestionEditorComponent implements OnInit {
     question: '',
     description: '',
     questionOrder: 1,
+    maxScore: 1,
     test: { id: this.testId },
     category: { id: 0 }
   };
@@ -76,6 +77,7 @@ export class QuestionEditorComponent implements OnInit {
         question: '',
         description: '',
         questionOrder: 1,
+        maxScore: 1,
         test: { id: this.testId },
         category: { id: 0 }
       };
@@ -116,6 +118,7 @@ export class QuestionEditorComponent implements OnInit {
             question: '',
             description: '',
             questionOrder: 1,
+            maxScore: 1,
             test: { id: this.testId },
             category: { id: 0 }
           };
@@ -138,6 +141,7 @@ export class QuestionEditorComponent implements OnInit {
             question: '',
             description: '',
             questionOrder: 1,
+            maxScore: 1,
             test: { id: this.testId },
             category: { id: 0 }
           };
