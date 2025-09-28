@@ -2,12 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { QuestionService } from '../../services/question.service';
 import { TestService } from '../../services/test.service';
+import { AnswerService } from '../../services/answer.service';
+import { ResultService } from '../../services/result.service';
 import { Question } from '../../models/Question';
 import { Test } from '../../models/Test';
+import { Answer } from '../../models/Answer';
+import { Result } from '../../models/Result';
 
-interface Answer {
+interface LocalAnswer {
   questionId: number;
   userAnswer: string;
   score: number | null;
@@ -42,13 +47,15 @@ export class MocaTestComponent implements OnInit {
   errorMessage = '';
   
   // Answers storage
-  answers: Answer[] = [];
+  answers: LocalAnswer[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private questionService: QuestionService,
-    private testService: TestService
+    private testService: TestService,
+    private answerService: AnswerService,
+    private resultService: ResultService
   ) {}
 
   ngOnInit(): void {
@@ -66,8 +73,8 @@ export class MocaTestComponent implements OnInit {
 
     // Cargar datos del test y preguntas en paralelo
     Promise.all([
-      this.testService.getAll().toPromise(),
-      this.questionService.getAllByTestId(this.testId).toPromise()
+      firstValueFrom(this.testService.getAll()),
+      firstValueFrom(this.questionService.getAllByTestId(this.testId))
     ]).then(([tests, questions]) => {
       if (tests && questions) {
         this.test = tests.find(t => t.id === this.testId)!;
@@ -162,10 +169,57 @@ export class MocaTestComponent implements OnInit {
   }
 
   finishTest(): void {
-    // Aquí puedes implementar la lógica para guardar todas las respuestas
-    console.log('Test completado. Respuestas:', this.answers);
-    // Por ahora, redirigir de vuelta
-    this.router.navigate(['/evaluacion']);
+    this.saveCurrentAnswer();
+    this.saveTestResult();
+  }
+
+  saveTestResult(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    console.log('Iniciando guardado del test...');
+    console.log('Test:', this.test);
+    console.log('Answers a guardar:', this.answers);
+    
+    try {
+      // Crear el payload para enviar al backend
+      const resultPayload = {
+        testId: this.test.id,
+        answers: this.answers.map(localAnswer => ({
+          questionId: localAnswer.questionId,
+          userAnswer: localAnswer.userAnswer,
+          score: localAnswer.score,
+          notes: localAnswer.notes
+        })),
+        totalScore: this.calculateTotalScore(),
+        evaluationDate: new Date().toISOString()
+      };
+
+      console.log('Payload a enviar:', resultPayload);
+
+      // Guardar el resultado usando el endpoint que espera el formato correcto
+      this.resultService.createFromPayload(resultPayload).subscribe({
+        next: () => {
+          console.log('Test completado y guardado exitosamente');
+          this.router.navigate(['/evaluacion']);
+        },
+        error: (error) => {
+          console.error('Error guardando resultado:', error);
+          this.errorMessage = 'Error al guardar el resultado. Intente nuevamente.';
+          this.isLoading = false;
+        }
+      });
+    } catch (error) {
+      console.error('Error preparando datos:', error);
+      this.errorMessage = 'Error al preparar los datos para guardar.';
+      this.isLoading = false;
+    }
+  }
+
+  calculateTotalScore(): number {
+    return this.answers.reduce((total, answer) => {
+      return total + (answer.score || 0);
+    }, 0);
   }
 
   clearAnswer(): void {

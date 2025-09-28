@@ -5,7 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { TestService } from '../../services/test.service';
+import { ResultService } from '../../services/result.service';
 import { Test } from '../../models/Test';
+import { Result } from '../../models/Result';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 
 @Component({
@@ -20,14 +22,19 @@ export class EvaluationComponent implements OnInit {
   constructor(
     private modal: NgbModal, 
     private testService: TestService,
+    private resultService: ResultService,
     private router: Router
   ) {}
 
   pageSize = 5;
   displayedExams: Test[] = [];
+  results: Result[] = [];
+  isLoading = false;
+  errorMessage = '';
 
   ngOnInit(): void {
     this.getAllTests();
+    this.getAllResults();
   }
 
   testList: Test[] = [];
@@ -39,6 +46,24 @@ export class EvaluationComponent implements OnInit {
         this.testList = data.filter(test => test.status === true);
         this.loadMore();
       },
+    });
+  }
+
+  getAllResults() {
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.resultService.getAll().subscribe({
+      next: (data) => {
+        this.results = data;
+        this.isLoading = false;
+        console.log('Resultados cargados:', this.results);
+      },
+      error: (error) => {
+        console.error('Error cargando resultados:', error);
+        this.errorMessage = 'Error al cargar los resultados';
+        this.isLoading = false;
+      }
     });
   }
 
@@ -66,5 +91,26 @@ export class EvaluationComponent implements OnInit {
   startTest(testId: number) {
     this.modal.dismissAll();
     this.router.navigate(['/moca-test', testId]);
+  }
+
+  viewResult(result: Result) {
+    console.log('Ver detalles del resultado:', result);
+    // Aquí puedes implementar un modal para mostrar los detalles
+    // o navegar a una página de detalles
+  }
+
+  deleteResult(resultId: number) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta evaluación?')) {
+      this.resultService.delete(resultId).subscribe({
+        next: () => {
+          console.log('Resultado eliminado exitosamente');
+          this.getAllResults(); // Recargar la lista
+        },
+        error: (error) => {
+          console.error('Error eliminando resultado:', error);
+          alert('Error al eliminar la evaluación');
+        }
+      });
+    }
   }
 }

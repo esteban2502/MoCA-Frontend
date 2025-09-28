@@ -23,7 +23,59 @@
           </tr>
         </thead>
         <tbody>
-          <tr></tr>
+          <!-- Mensaje de carga -->
+          <tr *ngIf="isLoading">
+            <td colspan="5" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+              <p class="mt-2 mb-0">Cargando resultados...</p>
+            </td>
+          </tr>
+          
+          <!-- Mensaje de error -->
+          <tr *ngIf="errorMessage && !isLoading">
+            <td colspan="5" class="text-center py-4 text-danger">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              {{ errorMessage }}
+            </td>
+          </tr>
+          
+          <!-- Mensaje cuando no hay resultados -->
+          <tr *ngIf="!isLoading && !errorMessage && results.length === 0">
+            <td colspan="5" class="text-center py-4 text-muted">
+              <i class="fas fa-clipboard-list me-2"></i>
+              No hay evaluaciones completadas aún.
+            </td>
+          </tr>
+          
+          <!-- Filas de resultados -->
+          <tr *ngFor="let result of results; let i = index">
+            <td>
+              <div class="d-flex gap-2">
+                <button 
+                  class="btn btn-sm btn-outline-primary" 
+                  ngbTooltip="Ver detalles"
+                  (click)="viewResult(result)"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button 
+                  class="btn btn-sm btn-outline-danger" 
+                  ngbTooltip="Eliminar"
+                  (click)="deleteResult(result.id!)"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+            <td></td>
+            <td></td>
+            <td>{{ result.test.title }}</td>
+            <td>
+              <span class="badge bg-success fs-6">{{ result.totalScore }}</span>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
