@@ -1,0 +1,72 @@
+/* Alerta personalizada que respeta el estilo de la aplicación */
+.custom-alert {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border: 2px solid #f39c12;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2);
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  animation: slideInDown 0.5s ease-out;
+}
+
+.custom-alert .fas {
+  color: #f39c12;
+  font-size: 1.5rem;
+}
+
+.custom-alert strong {
+  color: #d68910;
+  font-size: 1.1rem;
+}
+
+.custom-alert p {
+  color: #8b4513;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.custom-alert .btn-close {
+  background: none;
+  border: none;
+  color: #d68910;
+  font-size: 1.2rem;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.custom-alert .btn-close:hover {
+  opacity: 1;
+  color: #b7950b;
+}
+
+/* Animación de entrada */
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .custom-alert {
+    padding: 12px 16px;
+    margin-bottom: 15px;
+  }
+  
+  .custom-alert .fas {
+    font-size: 1.3rem;
+  }
+  
+  .custom-alert strong {
+    font-size: 1rem;
+  }
+  
+  .custom-alert p {
+    font-size: 0.9rem;
+  }
+}

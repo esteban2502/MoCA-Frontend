@@ -30,6 +30,8 @@ export class TestEditorComponent implements OnInit {
   newTest: Test = { title: '', description: '', status: true };
   idAux: number = 0;
   mode: 'create' | 'edit' = 'create';
+  errorMessage: string = '';
+  showError: boolean = false;
 
   ngOnInit(): void {
     this.getAllTests();
@@ -47,6 +49,7 @@ export class TestEditorComponent implements OnInit {
   }
 
   open(content: any, test?: Test) {
+    this.hideError(); // Limpiar errores previos
     if (test && test.id) {
       this.idAux = test.id;
       this.newTest = { ...test };
@@ -93,13 +96,24 @@ export class TestEditorComponent implements OnInit {
   }
 
   deleteTest(id: number): void {
+    this.hideError(); // Limpiar errores previos
     this.testService.deleteById(id).subscribe({
       next: () => {
         this.getAllTests();
         this.idAux = 0;
         this.modal.dismissAll();
-      }, // refresca lista
-      error: (err) => console.error('Error al eliminar test:', err),
+      },
+      error: (err) => {
+        // Cerrar el modal de confirmación primero
+        this.modal.dismissAll();
+        
+        if (err.status === 409) {
+          this.showErrorAlert(err.error || 'No se puede eliminar el examen porque tiene preguntas asociadas');
+        } else {
+          console.error('Error al eliminar test:', err);
+          this.showErrorAlert('Error inesperado al eliminar el examen');
+        }
+      },
     });
   }
 
@@ -109,5 +123,20 @@ export class TestEditorComponent implements OnInit {
       next: () => console.log('Estado actualizado'),
       error: (err) => console.error('Error al actualizar estado:', err),
     });
+  }
+
+  showErrorAlert(message: string): void {
+    this.errorMessage = message;
+    this.showError = true;
+    
+    // Auto-ocultar después de 5 segundos
+    setTimeout(() => {
+      this.hideError();
+    }, 5000);
+  }
+
+  hideError(): void {
+    this.showError = false;
+    this.errorMessage = '';
   }
 }
