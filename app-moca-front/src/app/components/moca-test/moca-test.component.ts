@@ -7,10 +7,12 @@ import { QuestionService } from '../../services/question.service';
 import { TestService } from '../../services/test.service';
 import { AnswerService } from '../../services/answer.service';
 import { ResultService } from '../../services/result.service';
+import { UserEntityService } from '../../services/user-entity.service';
 import { Question } from '../../models/Question';
 import { Test } from '../../models/Test';
 import { Answer } from '../../models/Answer';
 import { Result } from '../../models/Result';
+import { UserEntity, UserRegistrationRequest, UserLoginRequest } from '../../models/UserEntity';
 
 interface LocalAnswer {
   questionId: number;
@@ -49,13 +51,35 @@ export class MocaTestComponent implements OnInit {
   // Answers storage
   answers: LocalAnswer[] = [];
 
+  // User registration/login
+  showUserForm = true;
+  isRegistering = false;
+  currentUser: UserEntity | null = null;
+  
+  // Registration form
+  registrationForm: UserRegistrationRequest = {
+    fullName: '',
+    idNumber: '',
+    academicLevel: '',
+    birthDate: '',
+    email: '',
+    genero: '',
+    notes: ''
+  };
+  
+  // Login form
+  loginForm: UserLoginRequest = {
+    idNumber: ''
+  };
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private questionService: QuestionService,
     private testService: TestService,
     private answerService: AnswerService,
-    private resultService: ResultService
+    private resultService: ResultService,
+    private userEntityService: UserEntityService
   ) {}
 
   ngOnInit(): void {
@@ -185,6 +209,7 @@ export class MocaTestComponent implements OnInit {
       // Crear el payload para enviar al backend
       const resultPayload = {
         testId: this.test.id,
+        userId: this.currentUser?.id || null, // Usar null si no hay usuario
         answers: this.answers.map(localAnswer => ({
           questionId: localAnswer.questionId,
           userAnswer: localAnswer.userAnswer,
@@ -239,5 +264,104 @@ export class MocaTestComponent implements OnInit {
 
   get canGoPrevious(): boolean {
     return this.currentQuestionIndex > 0;
+  }
+
+  // User registration/login methods
+  toggleRegistrationMode(): void {
+    this.isRegistering = !this.isRegistering;
+    this.errorMessage = '';
+    this.clearForms();
+  }
+
+  clearForms(): void {
+    this.registrationForm = {
+      fullName: '',
+      idNumber: '',
+      academicLevel: '',
+      birthDate: '',
+      email: '',
+      genero: '',
+      notes: ''
+    };
+    this.loginForm = {
+      idNumber: ''
+    };
+  }
+
+  async loginUser(): Promise<void> {
+    if (!this.loginForm.idNumber.trim()) {
+      this.errorMessage = 'Por favor ingrese su cédula';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    try {
+      const user = await firstValueFrom(this.userEntityService.findByCedula(this.loginForm.idNumber));
+      this.currentUser = user;
+      this.showUserForm = false;
+      this.loadTestData();
+    } catch (error) {
+      console.error('Error buscando usuario:', error);
+      this.errorMessage = 'Usuario no encontrado. Por favor regístrese primero.';
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async registerUser(): Promise<void> {
+    if (!this.validateRegistrationForm()) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    try {
+      const user = await firstValueFrom(this.userEntityService.register(this.registrationForm));
+      this.currentUser = user;
+      this.showUserForm = false;
+      this.loadTestData();
+    } catch (error) {
+      console.error('Error registrando usuario:', error);
+      this.errorMessage = 'Error al registrar usuario. Intente nuevamente.';
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  validateRegistrationForm(): boolean {
+    if (!this.registrationForm.fullName.trim()) {
+      this.errorMessage = 'El nombre completo es requerido';
+      return false;
+    }
+    if (!this.registrationForm.idNumber.trim()) {
+      this.errorMessage = 'La cédula es requerida';
+      return false;
+    }
+    if (!this.registrationForm.academicLevel.trim()) {
+      this.errorMessage = 'El nivel académico es requerido';
+      return false;
+    }
+    if (!this.registrationForm.birthDate) {
+      this.errorMessage = 'La fecha de nacimiento es requerida';
+      return false;
+    }
+    if (!this.registrationForm.email.trim()) {
+      this.errorMessage = 'El email es requerido';
+      return false;
+    }
+    if (!this.registrationForm.genero.trim()) {
+      this.errorMessage = 'El género es requerido';
+      return false;
+    }
+    return true;
+  }
+
+  goBackToUserForm(): void {
+    this.showUserForm = true;
+    this.currentUser = null;
+    this.clearForms();
   }
 }

@@ -1,5 +1,173 @@
+<!-- User Registration/Login Form -->
+<div *ngIf="showUserForm" class="user-form-container">
+  <div class="user-form-content">
+    <div class="form-header">
+      
+      <div class="test-title">
+        <span><img src="/logo-ucp.png" alt="" width="80px" /></span>
+      </div>
+
+      <h2>Acceso a Evaluación</h2>
+      <p>Ingrese sus datos para comenzar la evaluación</p>
+    </div>
+
+    <!-- Toggle between login and registration -->
+    <div class="form-toggle">
+      <button 
+        class="toggle-btn" 
+        [class.active]="!isRegistering"
+        (click)="toggleRegistrationMode()"
+      >
+        Iniciar Sesión
+      </button>
+      <button 
+        class="toggle-btn" 
+        [class.active]="isRegistering"
+        (click)="toggleRegistrationMode()"
+      >
+        Registrarse
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Login Form -->
+    <form *ngIf="!isRegistering" (ngSubmit)="loginUser()" class="user-form">
+      <div class="form-group">
+        <label for="loginCedula">Cédula *</label>
+        <input
+          type="text"
+          id="loginCedula"
+          [(ngModel)]="loginForm.idNumber"
+          name="idNumber"
+          placeholder="Ingrese su número de cédula"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        <i class="bi bi-box-arrow-in-right" *ngIf="!isLoading"></i>
+        <div class="spinner-small" *ngIf="isLoading"></div>
+        {{ isLoading ? 'Buscando...' : 'Iniciar Evaluación' }}
+      </button>
+    </form>
+
+    <!-- Registration Form -->
+    <form *ngIf="isRegistering" (ngSubmit)="registerUser()" class="user-form">
+      <div class="form-group">
+        <label for="fullName">Nombre Completo *</label>
+        <input
+          type="text"
+          id="fullName"
+          [(ngModel)]="registrationForm.fullName"
+          name="fullName"
+          placeholder="Ingrese su nombre completo"
+          required
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="idNumber">Cédula *</label>
+          <input
+            type="text"
+            id="idNumber"
+            [(ngModel)]="registrationForm.idNumber"
+            name="idNumber"
+            placeholder="Número de cédula"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="academicLevel">Nivel Académico *</label>
+          <select
+            id="academicLevel"
+            [(ngModel)]="registrationForm.academicLevel"
+            name="academicLevel"
+            required
+          >
+            <option value="">Seleccione...</option>
+            <option value="PRIMARIA">Primaria</option>
+            <option value="SECUNDARIA">Secundaria</option>
+            <option value="TECNICO">Técnico</option>
+            <option value="UNIVERSITARIO">Universitario</option>
+            <option value="POSTGRADO">Postgrado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="birthDate">Fecha de Nacimiento *</label>
+          <input
+            type="date"
+            id="birthDate"
+            [(ngModel)]="registrationForm.birthDate"
+            name="birthDate"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input
+            type="email"
+            id="email"
+            [(ngModel)]="registrationForm.email"
+            name="email"
+            placeholder="correo@ejemplo.com"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="genero">Género *</label>
+        <select
+          id="genero"
+          [(ngModel)]="registrationForm.genero"
+          name="genero"
+          required
+        >
+          <option value="">Seleccione...</option>
+          <option value="MASCULINO">Masculino</option>
+          <option value="FEMENINO">Femenino</option>
+          <option value="OTRO">Otro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notas Adicionales</label>
+        <textarea
+          id="notes"
+          [(ngModel)]="registrationForm.notes"
+          name="notes"
+          placeholder="Información adicional (opcional)"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        <i class="bi bi-person-plus" *ngIf="!isLoading"></i>
+        <div class="spinner-small" *ngIf="isLoading"></div>
+        {{ isLoading ? 'Registrando...' : 'Registrarse y Continuar' }}
+      </button>
+    </form>
+
+    <div class="form-footer">
+      <button class="btn-secondary" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i>
+        Volver al inicio
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Loading State -->
-<div *ngIf="isLoading" class="loading-container">
+<div *ngIf="isLoading && !showUserForm" class="loading-container">
   <div class="loading-content">
     <div class="moca-logo">
       <div class="logo-circle">
@@ -29,7 +197,7 @@
 </div>
 
 <!-- Main Test Content -->
-<div *ngIf="!isLoading && !errorMessage" class="test-container">
+<div *ngIf="!isLoading && !errorMessage && !showUserForm" class="test-container">
   <!-- Header -->
   <header class="test-header">
     <div class="header-content">

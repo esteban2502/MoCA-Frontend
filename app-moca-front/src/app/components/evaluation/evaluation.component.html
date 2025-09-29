@@ -63,8 +63,8 @@
                 
               </div>
             </td>
-            <td></td>
-            <td></td>
+            <td>{{ result.user?.idNumber || 'Sin identificar' }}</td>
+            <td>{{ result.user?.fullName || 'Usuario no registrado' }}</td>
             <td>{{ result.test.title }}</td>
             <td>
               <div class="elegant-score">
