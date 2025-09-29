@@ -186,3 +186,70 @@
   }
 }
 
+/* Botón link simple y elegante */
+.table-custom .btn-link {
+  color: #2d5a27;
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.table-custom .btn-link:hover {
+  color: #1e3d1a;
+  background-color: rgba(45, 90, 39, 0.1);
+  text-decoration: none;
+}
+
+/* Estilos para el modal de detalles */
+.questions-container {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.questions-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.questions-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.questions-container::-webkit-scrollbar-thumb {
+  background: #2d5a27;
+  border-radius: 3px;
+}
+
+.questions-container::-webkit-scrollbar-thumb:hover {
+  background: #1e3d1a;
+}
+
+.question-item .card {
+  transition: all 0.3s ease;
+}
+
+.question-item .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.question-item .card-header {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+  border-bottom: 2px solid #2d5a27;
+}
+
+.question-item .badge {
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+}
+
+.border-start.border-success {
+  border-left-width: 4px !important;
+}
+
+.border-start.border-info {
+  border-left-width: 4px !important;
+}
+

@@ -24,12 +24,13 @@ export class EvaluationComponent implements OnInit {
     private modal: NgbModal, 
     private testService: TestService,
     private resultService: ResultService,
-    private router: Router
+    private router: Router,
   ) {}
 
   pageSize = 5;
   displayedExams: Test[] = [];
   results: Result[] = [];
+  selectedResult: Result | null = null;
   isLoading = false;
   errorMessage = '';
 
@@ -97,10 +98,27 @@ export class EvaluationComponent implements OnInit {
     this.router.navigate(['/moca-test', testId]);
   }
 
-  viewResult(result: Result) {
-    console.log('Ver detalles del resultado:', result);
-    // Aquí puedes implementar un modal para mostrar los detalles
-    // o navegar a una página de detalles
+  viewResult(content: any, result: Result) {
+    console.log('Resultado seleccionado:', result);
+    console.log('Answers del resultado:', result.answers);
+    if (result.answers && result.answers.length > 0) {
+      console.log('Primera respuesta:', result.answers[0]);
+      console.log('Question de la primera respuesta:', result.answers[0].question);
+    }
+    
+    this.selectedResult = result;
+    this.modal
+      .open(content, { size: 'lg', ariaLabelledBy: 'modal-basic-title' })
+      .result.then(
+        (result) => {
+          this.closeResult = `Closed with:${result} `;
+          this.selectedResult = null;
+        },
+        (reason = close) => {
+          this.closeResult = 'Dismissed';
+          this.selectedResult = null;
+        }
+      );
   }
 
   deleteResult(resultId: number) {
