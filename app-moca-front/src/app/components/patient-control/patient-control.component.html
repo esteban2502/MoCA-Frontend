@@ -34,7 +34,55 @@
           <th scope="col">Nacimiento</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
+        <!-- Mensaje de carga -->
+        <tr *ngIf="isLoading">
+          <td colspan="6" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 mb-0">Cargando pacientes...</p>
+          </td>
+        </tr>
+        
+        <!-- Mensaje de error -->
+        <tr *ngIf="errorMessage && !isLoading">
+          <td colspan="6" class="text-center py-4 text-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ errorMessage }}
+          </td>
+        </tr>
+        
+        <!-- Mensaje cuando no hay pacientes -->
+        <tr *ngIf="!isLoading && !errorMessage && patients.length === 0">
+          <td colspan="6" class="text-center py-4 text-muted">
+            <i class="bi bi-person-x me-2"></i>
+            No hay pacientes registrados aún.
+          </td>
+        </tr>
+        
+        <!-- Filas de pacientes -->
+        <tr *ngFor="let patient of patients  | paginate : { itemsPerPage: itemsPerPage, currentPage: p }">
+          <td>
+            <!-- Botones de acción (por implementar) -->
+            <div class="d-flex justify-content-center">
+            </div>
+          </td>
+          <td>{{ patient.idNumber }}</td>
+          <td>{{ patient.fullName }}</td>
+          <td>{{ patient.email }}</td>
+          <td>{{ patient.genero }}</td>
+          <td>{{ patient.birthDate | date:'dd/MM/yyyy' }}</td>
+        </tr>
+      </tbody>
     </table>
+  </div>
+  <div class="d-flex justify-content-end mt-3">
+    <pagination-controls
+      (pageChange)="p = $event"
+      previousLabel=""
+      nextLabel=""
+      [maxSize]="5"
+    ></pagination-controls>
   </div>
 </div>
