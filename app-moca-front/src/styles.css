@@ -208,6 +208,13 @@ h1 {
   line-height: 1;
 }
 
+.score-chip-lg {
+  min-width: 56px;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 1rem;
+}
+
 /* Ajustes para pantallas pequeñas (móvil) */
 @media (max-width: 576px) {
   .table-responsive {
