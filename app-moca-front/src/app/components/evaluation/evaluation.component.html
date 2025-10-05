@@ -15,11 +15,11 @@
       <table class="table-custom">
         <thead class="">
           <tr>
-            <th scope="col">Acciones</th>
+            <th class="text-center" scope="col">Acciones</th>
             <th scope="col">Identificación</th>
             <th scope="col">Nombre</th>
             <th scope="col">Evaluación</th>
-            <th scope="col">Puntaje</th>
+            <th class="text-center" scope="col">Puntaje</th>
           </tr>
         </thead>
         <tbody>
@@ -66,11 +66,8 @@
             <td>{{ result.user?.idNumber || 'Sin identificar' }}</td>
             <td>{{ result.user?.fullName || 'Usuario no registrado' }}</td>
             <td>{{ result.test.title }}</td>
-            <td>
-              <div class="elegant-score">
-                <div class="score-number">{{ result.totalScore }}</div>
-                <div class="score-text">puntos</div>
-              </div>
+            <td class="text-center">
+              <span class="score-chip">{{ result.totalScore }}</span>
             </td>
           </tr>
         </tbody>
@@ -201,16 +198,7 @@
                 {{ answer.question.description }}
               </p>
               
-              <!-- Respuesta del usuario -->
-              <div class="mb-3">
-                <label class="form-label fw-semibold text-success">
-                  <i class="bi bi-person-check me-1"></i>
-                  Respuesta del Usuario:
-                </label>
-                <div class="p-3 bg-light rounded border-start border-success border-3">
-                  <p class="mb-0">{{ answer.userAnswer || 'Sin respuesta' }}</p>
-                </div>
-              </div>
+              
 
               <!-- Puntaje obtenido -->
               <div class="row mb-3">

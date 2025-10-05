@@ -122,6 +122,10 @@ h1 {
   font-weight: 600;
   font-size: 14px;
   letter-spacing: 0.01em;
+  white-space: normal; /* permitir saltos */
+  overflow-wrap: anywhere; /* romper palabras largas */
+  word-break: break-word; /* compatibilidad */
+  line-height: 1.35;
 }
 
 /* Filas */
@@ -137,6 +141,10 @@ h1 {
   max-width: 180px;
   min-width: 150px;
   letter-spacing: 0.01em;
+  white-space: normal; /* permitir saltos */
+  overflow-wrap: anywhere; /* romper palabras largas */
+  word-break: break-word; /* compatibilidad */
+  line-height: 1.4;
 }
 
 
@@ -168,6 +176,50 @@ h1 {
 
 .btn-close {
   filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Altura uniforme para tablas (evita saltos al paginar) */
+.table-responsive {
+  height: 420px; /* altura constante para lista + header */
+  overflow-y: auto; /* desplazar contenido si excede */
+}
+
+/* Asegurar que la tabla ocupe todo el ancho del contenedor */
+.table-responsive > .table-custom {
+  width: 100%;
+  table-layout: fixed; /* columnas uniformes */
+}
+
+/* Chip de puntaje minimalista (vibe Apple, sin saturación) */
+.score-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 128, 78, 0.22); /* usa verde de la app suavizado */
+  background: rgba(0, 128, 78, 0.06);
+  color: var(--green);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Ajustes para pantallas pequeñas (móvil) */
+@media (max-width: 576px) {
+  .table-responsive {
+    overflow-x: auto; /* permitir scroll horizontal solo en móvil si se requiere */
+  }
+  .table-custom thead th,
+  .table-custom tbody td {
+    min-width: 160px !important;  /* más espacio por columna para evitar compresión excesiva */
+    width: 160px !important;
+    padding: 12px 10px; /* mayor altura para legibilidad */
+    font-size: 13px;
+  }
 }
 
  .btn-circle {

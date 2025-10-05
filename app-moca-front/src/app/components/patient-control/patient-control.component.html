@@ -11,8 +11,10 @@
           type="text" 
           placeholder="Buscar pacientes..." 
           id="patientSearch"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
         />
-        <button class="search-clear-btn" type="button" title="Limpiar">
+        <button class="search-clear-btn" type="button" title="Limpiar" (click)="clearSearch()">
           <i class="bi bi-x"></i>
         </button>
       </div>
@@ -26,7 +28,7 @@
     <table class="table-custom">
       <thead class="">
         <tr>
-          <th scope="col">Acciones</th>
+          <th class="text-center" scope="col">Acciones</th>
           <th scope="col">Cedula</th>
           <th scope="col">Nombre</th>
           <th scope="col">Correo</th>
@@ -62,7 +64,7 @@
         </tr>
         
         <!-- Filas de pacientes -->
-        <tr *ngFor="let patient of patients  | paginate : { itemsPerPage: itemsPerPage, currentPage: p }">
+        <tr *ngFor="let patient of filteredPatients  | paginate : { itemsPerPage: itemsPerPage, currentPage: p }">
           <td>
             <!-- Botones de acción (por implementar) -->
             <div class="d-flex justify-content-center">
