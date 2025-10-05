@@ -83,71 +83,14 @@
           />
         </div>
         <div class="form-group">
-          <label for="academicLevel">Nivel Académico *</label>
-          <select
-            id="academicLevel"
-            [(ngModel)]="registrationForm.academicLevel"
-            name="academicLevel"
-            required
-          >
-            <option value="">Seleccione...</option>
-            <option value="PRIMARIA">Primaria</option>
-            <option value="SECUNDARIA">Secundaria</option>
-            <option value="TECNICO">Técnico</option>
-            <option value="UNIVERSITARIO">Universitario</option>
-            <option value="POSTGRADO">Postgrado</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="birthDate">Fecha de Nacimiento *</label>
+          <label for="birthDate">Fecha de Nacimiento</label>
           <input
             type="date"
             id="birthDate"
             [(ngModel)]="registrationForm.birthDate"
             name="birthDate"
-            required
           />
         </div>
-        <div class="form-group">
-          <label for="email">Email *</label>
-          <input
-            type="email"
-            id="email"
-            [(ngModel)]="registrationForm.email"
-            name="email"
-            placeholder="correo@ejemplo.com"
-            required
-          />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="genero">Género *</label>
-        <select
-          id="genero"
-          [(ngModel)]="registrationForm.genero"
-          name="genero"
-          required
-        >
-          <option value="">Seleccione...</option>
-          <option value="MASCULINO">Masculino</option>
-          <option value="FEMENINO">Femenino</option>
-          <option value="OTRO">Otro</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="notes">Notas Adicionales</label>
-        <textarea
-          id="notes"
-          [(ngModel)]="registrationForm.notes"
-          name="notes"
-          placeholder="Información adicional (opcional)"
-          rows="3"
-        ></textarea>
       </div>
 
       <button type="submit" class="btn-primary" [disabled]="isLoading">

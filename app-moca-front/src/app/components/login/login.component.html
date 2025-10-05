@@ -7,21 +7,28 @@
     <div class="px-4">
       <h1 class="mb-3">Software MoCA</h1>
 
-      <div>
+      <form (ngSubmit)="onSubmit()">
         <div class="col-12 mb-3">
           <input
             class="form-control"
-            placeholder="Identificación"
-            type="text"
+            placeholder="Correo electrónico"
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            required
           />
         </div>
 
         <div class="col-12 mb-3">
-          <input class="form-control" placeholder="Contraseña" type="password" />
+          <input class="form-control" placeholder="Contraseña" type="password" [(ngModel)]="password" name="password" required />
         </div>
 
-        <button class="btnGreen col-12 mb-4">Entrar</button>
-      </div>
+        <div *ngIf="errorMessage" class="text-danger mb-2">{{ errorMessage }}</div>
+
+        <button class="btnGreen col-12 mb-4" type="submit" [disabled]="isLoading">
+          {{ isLoading ? 'Ingresando...' : 'Entrar' }}
+        </button>
+      </form>
     </div>
   </div>
 </div>

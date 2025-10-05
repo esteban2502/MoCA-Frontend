@@ -7,12 +7,12 @@ import { QuestionService } from '../../services/question.service';
 import { TestService } from '../../services/test.service';
 import { AnswerService } from '../../services/answer.service';
 import { ResultService } from '../../services/result.service';
-import { UserEntityService } from '../../services/user-entity.service';
 import { Question } from '../../models/Question';
 import { Test } from '../../models/Test';
 import { Answer } from '../../models/Answer';
 import { Result } from '../../models/Result';
-import { UserEntity, UserRegistrationRequest, UserLoginRequest } from '../../models/UserEntity';
+import { Patient } from '../../models/Patient';
+import { PatientService } from '../../services/patient.service';
 
 interface LocalAnswer {
   questionId: number;
@@ -51,24 +51,22 @@ export class MocaTestComponent implements OnInit {
   // Answers storage
   answers: LocalAnswer[] = [];
 
-  // User registration/login
+  // Patient selection
+  selectedPatient: Patient | null = null;
+
+  // Patient login/registration form state
   showUserForm = true;
   isRegistering = false;
-  currentUser: UserEntity | null = null;
   
-  // Registration form
-  registrationForm: UserRegistrationRequest = {
+  // Registration form (map to patient fields)
+  registrationForm = {
     fullName: '',
     idNumber: '',
-    academicLevel: '',
-    birthDate: '',
-    email: '',
-    genero: '',
-    notes: ''
+    birthDate: ''
   };
   
-  // Login form
-  loginForm: UserLoginRequest = {
+  // Login form (documentNumber)
+  loginForm = {
     idNumber: ''
   };
 
@@ -79,7 +77,7 @@ export class MocaTestComponent implements OnInit {
     private testService: TestService,
     private answerService: AnswerService,
     private resultService: ResultService,
-    private userEntityService: UserEntityService
+    private patientService: PatientService
   ) {}
 
   ngOnInit(): void {
@@ -198,18 +196,19 @@ export class MocaTestComponent implements OnInit {
   }
 
   saveTestResult(): void {
+    if (!this.selectedPatient) {
+      this.errorMessage = 'Seleccione o registre un paciente antes de finalizar.';
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
     
-    console.log('Iniciando guardado del test...');
-    console.log('Test:', this.test);
-    console.log('Answers a guardar:', this.answers);
-    
     try {
-      // Crear el payload para enviar al backend
       const resultPayload = {
         testId: this.test.id,
-        userId: this.currentUser?.id || null, // Usar null si no hay usuario
+        userId: null, // legacy
+        patientId: this.selectedPatient.id,
         answers: this.answers.map(localAnswer => ({
           questionId: localAnswer.questionId,
           userAnswer: localAnswer.userAnswer,
@@ -220,12 +219,8 @@ export class MocaTestComponent implements OnInit {
         evaluationDate: new Date().toISOString()
       };
 
-      console.log('Payload a enviar:', resultPayload);
-
-      // Guardar el resultado usando el endpoint que espera el formato correcto
       this.resultService.createFromPayload(resultPayload).subscribe({
         next: () => {
-          console.log('Test completado y guardado exitosamente');
           this.router.navigate(['/evaluacion']);
         },
         error: (error) => {
@@ -266,7 +261,7 @@ export class MocaTestComponent implements OnInit {
     return this.currentQuestionIndex > 0;
   }
 
-  // User registration/login methods
+  // Patient login/registration
   toggleRegistrationMode(): void {
     this.isRegistering = !this.isRegistering;
     this.errorMessage = '';
@@ -277,11 +272,7 @@ export class MocaTestComponent implements OnInit {
     this.registrationForm = {
       fullName: '',
       idNumber: '',
-      academicLevel: '',
-      birthDate: '',
-      email: '',
-      genero: '',
-      notes: ''
+      birthDate: ''
     };
     this.loginForm = {
       idNumber: ''
@@ -290,7 +281,7 @@ export class MocaTestComponent implements OnInit {
 
   async loginUser(): Promise<void> {
     if (!this.loginForm.idNumber.trim()) {
-      this.errorMessage = 'Por favor ingrese su cédula';
+      this.errorMessage = 'Por favor ingrese la cédula del paciente';
       return;
     }
 
@@ -298,20 +289,21 @@ export class MocaTestComponent implements OnInit {
     this.errorMessage = '';
 
     try {
-      const user = await firstValueFrom(this.userEntityService.findByCedula(this.loginForm.idNumber));
-      this.currentUser = user;
+      const patient = await firstValueFrom(this.patientService.findByDocument(this.loginForm.idNumber));
+      this.selectedPatient = patient;
       this.showUserForm = false;
       this.loadTestData();
     } catch (error) {
-      console.error('Error buscando usuario:', error);
-      this.errorMessage = 'Usuario no encontrado. Por favor regístrese primero.';
+      console.error('Error buscando paciente:', error);
+      this.errorMessage = 'Paciente no encontrado. Por favor regístrelo primero.';
     } finally {
       this.isLoading = false;
     }
   }
 
   async registerUser(): Promise<void> {
-    if (!this.validateRegistrationForm()) {
+    if (!this.registrationForm.fullName.trim() || !this.registrationForm.idNumber.trim()) {
+      this.errorMessage = 'Nombre y cédula son requeridos';
       return;
     }
 
@@ -319,13 +311,17 @@ export class MocaTestComponent implements OnInit {
     this.errorMessage = '';
 
     try {
-      const user = await firstValueFrom(this.userEntityService.register(this.registrationForm));
-      this.currentUser = user;
+      const patient = await firstValueFrom(this.patientService.create({
+        fullName: this.registrationForm.fullName,
+        documentNumber: this.registrationForm.idNumber,
+        birthDate: this.registrationForm.birthDate
+      }));
+      this.selectedPatient = patient;
       this.showUserForm = false;
       this.loadTestData();
     } catch (error) {
-      console.error('Error registrando usuario:', error);
-      this.errorMessage = 'Error al registrar usuario. Intente nuevamente.';
+      console.error('Error registrando paciente:', error);
+      this.errorMessage = 'Error al registrar paciente. Intente nuevamente.';
     } finally {
       this.isLoading = false;
     }
@@ -340,20 +336,8 @@ export class MocaTestComponent implements OnInit {
       this.errorMessage = 'La cédula es requerida';
       return false;
     }
-    if (!this.registrationForm.academicLevel.trim()) {
-      this.errorMessage = 'El nivel académico es requerido';
-      return false;
-    }
     if (!this.registrationForm.birthDate) {
       this.errorMessage = 'La fecha de nacimiento es requerida';
-      return false;
-    }
-    if (!this.registrationForm.email.trim()) {
-      this.errorMessage = 'El email es requerido';
-      return false;
-    }
-    if (!this.registrationForm.genero.trim()) {
-      this.errorMessage = 'El género es requerido';
       return false;
     }
     return true;
@@ -361,7 +345,7 @@ export class MocaTestComponent implements OnInit {
 
   goBackToUserForm(): void {
     this.showUserForm = true;
-    this.currentUser = null;
+    this.selectedPatient = null;
     this.clearForms();
   }
 }

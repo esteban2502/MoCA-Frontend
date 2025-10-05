@@ -2,13 +2,24 @@
 <div class="container mt-5">
   <div class="d-flex justify-content-between align-items-center my-3">
     <h1 class="mb-0">Configuración de Pruebas</h1>
-    <button
-      (click)="open(newEntity)"
-      ngbTooltip="Crear una nueva prueba"
-      class="btnGreen"
-    >
-      Crear
-    </button>
+    <div class="d-flex gap-2">
+      <a
+        *ngIf="isAdmin"
+        [routerLink]="['/usuarios/nuevo']"
+        ngbTooltip="Registrar nuevo usuario"
+        class="btnGreen d-flex align-items-center register-link-btn"
+      >
+        <i class="bi bi-person-plus me-2"></i>
+        <span class="label">Registrar usuario</span>
+      </a>
+      <button
+        (click)="open(newEntity)"
+        ngbTooltip="Crear una nueva prueba"
+        class="btnGreen"
+      >
+        Crear
+      </button>
+    </div>
   </div>
 
     <div class="table-responsive mt-2">

@@ -1,0 +1,60 @@
+.register-card {
+  max-width: 900px;
+}
+
+h1 {
+  color: #fff;
+}
+
+.form-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.12); /* neutral */
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.55));
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  color: #0f172a; /* neutral text */
+  padding: 8px 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(15, 23, 42, 0.2);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.back-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.back-btn i {
+  font-size: 1rem;
+  color: #111827; /* neutral icon color */
+}
+
+.back-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.18);
+}
+
+@media (max-width: 576px) {
+  .back-btn {
+    padding: 8px 12px;
+  }
+  .back-btn i {
+    font-size: 0.95rem;
+  }
+}
+
+

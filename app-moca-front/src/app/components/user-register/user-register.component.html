@@ -1,0 +1,57 @@
+<div class="container d-flex align-items-center justify-content-center py-5">
+  <div class="cardCustom mx-3 w-100 register-card">
+    <div class="headerCard mb-4 p-4 d-flex align-items-center">
+      <img src="/logo-ucp.png" alt="" width="70px" />
+      <h1 class="ms-3 mb-0 text-white">Registrar Usuario</h1>
+    </div>
+
+    <div class="px-4 pb-4">
+      <form (ngSubmit)="onSubmit()">
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label">Nombre *</label>
+            <input class="form-control" [(ngModel)]="form.name" name="name" placeholder="Nombre completo" required />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">Cédula *</label>
+            <input class="form-control" [(ngModel)]="form.idNumber" name="idNumber" placeholder="Número de identificación" required />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">Email *</label>
+            <input type="email" class="form-control" [(ngModel)]="form.email" name="email" placeholder="correo@ucp.edu.co" required />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">Contraseña *</label>
+            <input type="password" class="form-control" [(ngModel)]="form.password" name="password" placeholder="Ingrese su Contraseña" required />
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label">Rol *</label>
+            <select class="form-select" [(ngModel)]="form.roleRequest.roleListName" name="roles" required>
+              <option [ngValue]="['USER']">USER</option>
+              <option [ngValue]="['ADMIN']">ADMIN</option>
+            </select>
+          </div>
+        </div>
+
+        <div *ngIf="errorMessage" class="text-danger mt-3">{{ errorMessage }}</div>
+        <div *ngIf="successMessage" class="text-success mt-3">{{ successMessage }}</div>
+
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+          <a [routerLink]="['/pruebas']" class="btn btn-light d-flex align-items-center back-btn">
+            <i class="bi bi-arrow-left me-2"></i>
+            Volver
+          </a>
+          <button class="btnGreen" type="submit" [disabled]="isLoading">
+            {{ isLoading ? 'Creando...' : 'Crear Usuario' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+

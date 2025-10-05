@@ -3,8 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { TabsComponent } from '../tabs/tabs.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
-import { UserEntityService } from '../../services/user-entity.service';
-import { UserEntity } from '../../models/UserEntity';
+import { PatientService } from '../../services/patient.service';
+import { Patient } from '../../models/Patient';
 import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
@@ -15,7 +15,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
   styleUrl: './patient-control.component.css'
 })
 export class PatientControlComponent implements OnInit {
-  patients: UserEntity[] = [];
+  patients: Patient[] = [];
   isLoading = false;
   errorMessage = '';
 
@@ -25,7 +25,7 @@ export class PatientControlComponent implements OnInit {
   // Texto de búsqueda
   searchTerm: string = '';
 
-  constructor(private userEntityService: UserEntityService) {}
+  constructor(private patientService: PatientService) {}
 
   ngOnInit(): void {
     this.loadPatients();
@@ -35,7 +35,7 @@ export class PatientControlComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.userEntityService.getAll().subscribe({
+    this.patientService.list().subscribe({
       next: (data) => {
         this.patients = data;
         this.isLoading = false;
@@ -48,15 +48,14 @@ export class PatientControlComponent implements OnInit {
     });
   }
 
-  // Lista filtrada por cédula, nombre o correo (insensible a mayúsculas)
-  get filteredPatients(): UserEntity[] {
+  // Lista filtrada por cédula, nombre (insensible a mayúsculas)
+  get filteredPatients(): Patient[] {
     const term = this.searchTerm.trim().toLowerCase();
     if (!term) return this.patients;
     return this.patients.filter((p) => {
-      const id = (p.idNumber || '').toString().toLowerCase();
+      const id = (p.documentNumber || '').toString().toLowerCase();
       const name = (p.fullName || '').toLowerCase();
-      const email = (p.email || '').toLowerCase();
-      return id.includes(term) || name.includes(term) || email.includes(term);
+      return id.includes(term) || name.includes(term);
     });
   }
 

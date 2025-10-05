@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-test-editor',
@@ -24,7 +25,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
   styleUrl: './test-editor.component.css',
 })
 export class TestEditorComponent implements OnInit {
-  constructor(private modal: NgbModal, private testService: TestService) {}
+  constructor(private modal: NgbModal, private testService: TestService, private authService: AuthService) {}
 
   testList: Test[] = [];
   newTest: Test = { title: '', description: '', status: true };
@@ -37,6 +38,10 @@ export class TestEditorComponent implements OnInit {
   closeResult: string = '';
   itemsPerPage: number = 5; 
   p: number = 1;
+
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
 
   getAllTests() {
     this.testService.getAll().subscribe({

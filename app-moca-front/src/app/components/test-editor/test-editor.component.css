@@ -41,3 +41,32 @@
     vertical-align: middle;
   }
 }
+
+/* Ajustes específicos del botón Registrar usuario */
+.register-link-btn i {
+  font-size: 1rem; /* icono más pequeño */
+}
+
+.register-link-btn .label {
+  font-size: 0.9rem; /* texto ligeramente más pequeño */
+}
+
+@media (max-width: 420px) {
+  .register-link-btn .label {
+    display: none; /* en móviles muy pequeños, solo icono */
+  }
+  .register-link-btn i {
+    margin-right: 0 !important;
+  }
+}
+
+/* En móviles (<= 768px), ocultar el icono y mantener solo el texto */
+@media (max-width: 767.98px) {
+  .register-link-btn i {
+    display: none;
+  }
+  .register-link-btn .label {
+    font-size: 0.95rem;
+    margin-left: 0 !important;
+  }
+}
