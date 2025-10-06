@@ -99,13 +99,14 @@
 <ng-template #newEntity let-modal>
   <div newEntity class="modal-content modalCustom">
     <div class="modal-content">
-      <div class="modal-header modalCustom">
-        <span><img src="/logo-blanco.png" alt="" width="125px" /></span>
-
+      <div class="modal-header" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; border-bottom: none;">
+        <div class="d-flex align-items-center">
+          <img src="/logo-blanco.png" alt="Logo MoCA" style="height: 50px; width: auto;">
+        </div>
         <button
           type="button"
           (click)="modal.close('Close click')"
-          class="btn-close"
+          class="btn-close btn-close-white"
           aria-label="Close"
         ></button>
       </div>
@@ -153,13 +154,14 @@
 <ng-template #deleteEntity let-modal>
   <div deleteEntity class="modal-content modalCustom">
     <div class="modal-content">
-      <div class="modal-header modalCustom">
-        <span><img src="/logo-blanco.png" alt="" width="125px" /></span>
-
+      <div class="modal-header" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; border-bottom: none;">
+        <div class="d-flex align-items-center">
+          <img src="/logo-blanco.png" alt="Logo MoCA" style="height: 50px; width: auto;">
+        </div>
         <button
           type="button"
           (click)="modal.close('Close click')"
-          class="btn-close"
+          class="btn-close btn-close-white"
           aria-label="Close"
         ></button>
       </div>

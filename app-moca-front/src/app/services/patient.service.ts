@@ -29,6 +29,14 @@ export class PatientService {
   debugAllPatients(): Observable<string> {
     return this.http.get<string>(`${this.apiUrl}/debug-all-patients`);
   }
+
+  exportToExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/export/excel`, { responseType: 'blob' });
+  }
+
+  update(id: number, patient: Patient): Observable<Patient> {
+    return this.http.put<Patient>(`${this.apiUrl}/${id}`, patient);
+  }
 }
 
 

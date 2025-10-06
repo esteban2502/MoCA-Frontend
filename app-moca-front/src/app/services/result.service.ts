@@ -44,4 +44,16 @@ export class ResultService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  getByPatientId(patientId: number): Observable<Result[]> {
+    return this.http.get<Result[]>(`${this.apiUrl}/patient/${patientId}`);
+  }
+
+  exportToExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/export/excel`, { responseType: 'blob' });
+  }
+
+  exportPatientHistoryToExcel(patientId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/export/excel/patient/${patientId}`, { responseType: 'blob' });
+  }
 }

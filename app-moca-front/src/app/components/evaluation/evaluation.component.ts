@@ -165,4 +165,23 @@ export class EvaluationComponent implements OnInit {
     this.searchTerm = '';
     this.p = 1;
   }
+
+  // Método para exportar evaluaciones a Excel
+  exportToExcel(): void {
+    this.resultService.exportToExcel().subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `evaluaciones_${new Date().toISOString().split('T')[0]}.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        console.log('✅ Archivo Excel descargado exitosamente');
+      },
+      error: (error: any) => {
+        console.error('❌ Error exportando a Excel:', error);
+        alert('Error al exportar el archivo Excel');
+      }
+    });
+  }
 }

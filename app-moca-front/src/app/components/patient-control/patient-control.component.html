@@ -22,7 +22,7 @@
    <!-- <button class="btn btn-info me-2" (click)="debugAllPatients()" ngbTooltip="Debug todos los pacientes">
       Debug All
     </button>-->
-    <button class="btnGreen" ngbTooltip="Exportar información a Excel">
+    <button class="btnGreen" ngbTooltip="Exportar información a Excel" (click)="exportToExcel()">
       Exportar
     </button>
   </div>
@@ -66,11 +66,27 @@
         
         <!-- Filas de pacientes -->
         <tr *ngFor="let patient of filteredPatients  | paginate : { itemsPerPage: itemsPerPage, currentPage: p }">
-          <td>
-            <!-- Botones de acción (por implementar) -->
-            <div class="d-flex justify-content-center">
-            </div>
-          </td>
+                  <td>
+                    <!-- Botones de acción -->
+                    <div class="d-flex justify-content-center gap-2">
+                      <button
+                        class="btn btn-sm history-btn"
+                        ngbTooltip="Ver historial de evaluaciones"
+                        (click)="openHistoryModal(patient, historyModal)"
+                      >
+                        <i class="bi bi-clock-history me-1"></i>
+                        Historial
+                      </button>
+                      <button
+                        class="btn btn-sm edit-btn"
+                        ngbTooltip="Editar información del paciente"
+                        (click)="openEditModal(patient, editModal)"
+                      >
+                        <i class="bi bi-pencil me-1"></i>
+                        Editar
+                      </button>
+                    </div>
+                  </td>
           <td>{{ patient.documentNumber }}</td>
           <td>{{ patient.fullName }}</td>
           <td>{{ patient.birthDate | date:'dd/MM/yyyy' }}</td>
@@ -87,3 +103,196 @@
     ></pagination-controls>
   </div>
 </div>
+
+<!-- Modal de Historial de Evaluaciones -->
+<ng-template #historyModal let-modal>
+          <div class="modal-header" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; border-bottom: none;">
+            <div class="d-flex align-items-center">
+              <img src="/logo-blanco.png" alt="Logo MoCA" style="height: 50px; width: auto;">
+            </div>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              aria-label="Close"
+              (click)="closeModal()"
+            ></button>
+          </div>
+
+  <div class="modal-body">
+    <!-- Información del paciente -->
+    <div class="row mb-4" *ngIf="selectedPatient">
+      <div class="col-12">
+        <div class="card" style="border: 2px solid #00804e; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 128, 78, 0.15);">
+          <div class="card-header" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; border-radius: 10px 10px 0 0;">
+            <h5 class="mb-0">
+              <i class="bi bi-person-circle me-2"></i>
+              {{ selectedPatient.fullName }}
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <strong>Cédula:</strong> {{ selectedPatient.documentNumber }}
+              </div>
+              <div class="col-md-6" *ngIf="selectedPatient.birthDate">
+                <strong>Fecha de Nacimiento:</strong> {{ selectedPatient.birthDate | date:'dd/MM/yyyy' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de evaluaciones -->
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0" style="color: #00804e; font-weight: 600;">
+            <i class="bi bi-clipboard-data me-2"></i>
+            Evaluaciones Realizadas
+          </h6>
+          <button 
+            class="btn btn-sm export-history-btn" 
+            (click)="exportPatientHistoryToExcel()"
+            [disabled]="!patientResults || patientResults.length === 0"
+            ngbTooltip="Exportar historial de evaluaciones a Excel"
+          >
+            <i class="bi bi-file-earmark-excel me-1"></i>
+            Exportar Excel
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="isLoadingResults" class="text-center py-4">
+          <div class="spinner-border" role="status" style="color: #00804e;">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="mt-2 mb-0" style="color: #00804e;">Cargando evaluaciones...</p>
+        </div>
+
+        <!-- Sin evaluaciones -->
+        <div *ngIf="!isLoadingResults && patientResults.length === 0" class="text-center py-4 text-muted">
+          <i class="bi bi-clipboard-x me-2"></i>
+          No hay evaluaciones registradas para este paciente.
+        </div>
+
+        <!-- Lista de evaluaciones -->
+        <div *ngIf="!isLoadingResults && patientResults.length > 0" class="list-group">
+          <div *ngFor="let result of patientResults; let i = index" class="list-group-item" style="border: 1px solid #e9ecef; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <h6 class="mb-1" style="color: #00804e; font-weight: 600;">
+                  <i class="bi bi-clipboard-check me-2"></i>
+                  {{ result.test.title || 'Evaluación' }}
+                </h6>
+                <p class="mb-1 text-muted">
+                  <i class="bi bi-calendar me-1"></i>
+                  {{ result.evaluationDate | date:'dd/MM/yyyy HH:mm' }}
+                </p>
+                <small class="text-muted">
+                  <i class="bi bi-person me-1"></i>
+                  Evaluado por: {{ result.user?.fullName || 'Sin identificar' }}
+                </small>
+              </div>
+              <div class="text-end">
+                <span class="badge fs-6" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; padding: 8px 12px; border-radius: 20px;">
+                  {{ result.totalScore || 0 }} pts
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer" style="border-top: 1px solid #e9ecef; background-color: #f8f9fa;">
+    <button type="button" class="btnGreen" (click)="closeModal()">
+      <i class="bi bi-x-circle me-1"></i>
+      Cerrar
+    </button>
+          </div>
+        </ng-template>
+
+        <!-- Modal de Edición de Paciente -->
+        <ng-template #editModal let-modal>
+          <div class="modal-header" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; border-bottom: none;">
+            <div class="d-flex align-items-center">
+              <img src="/logo-blanco.png" alt="Logo MoCA" style="height: 50px; width: auto;">
+            </div>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              aria-label="Close"
+              (click)="closeEditModal()"
+            ></button>
+          </div>
+
+          <div class="modal-body" *ngIf="editingPatient">
+            <form>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="documentNumber" class="form-label fw-semibold">
+                    <i class="bi bi-card-text me-1"></i>
+                    Cédula
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="documentNumber"
+                    [(ngModel)]="editingPatient.documentNumber"
+                    name="documentNumber"
+                    readonly
+                    style="background-color: #f8f9fa;"
+                  >
+                  <small class="text-muted">La cédula no se puede modificar por seguridad</small>
+                </div>
+                <div class="col-md-6">
+                  <label for="fullName" class="form-label fw-semibold">
+                    <i class="bi bi-person me-1"></i>
+                    Nombre Completo *
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="fullName"
+                    [(ngModel)]="editingPatient.fullName"
+                    name="fullName"
+                    required
+                    placeholder="Ingrese el nombre completo"
+                  >
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="birthDate" class="form-label fw-semibold">
+                    <i class="bi bi-calendar me-1"></i>
+                    Fecha de Nacimiento
+                  </label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="birthDate"
+                    [(ngModel)]="editingPatient.birthDate"
+                    name="birthDate"
+                  >
+                </div>
+              </div>
+
+              <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Nota:</strong> Solo se pueden editar el nombre completo y la fecha de nacimiento. La cédula no se puede modificar por razones de seguridad.
+              </div>
+            </form>
+          </div>
+
+          <div class="modal-footer" style="border-top: 1px solid #e9ecef; background-color: #f8f9fa;">
+            <button type="button" class="btnRed" (click)="closeEditModal()">
+              Cancelar
+            </button>
+            <button type="button" class="btnGreen" (click)="savePatientChanges()" [disabled]="!editingPatient?.fullName?.trim()">
+              Guardar
+            </button>
+          </div>
+        </ng-template>

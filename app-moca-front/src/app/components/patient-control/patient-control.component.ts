@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TabsComponent } from '../tabs/tabs.component';
-import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTooltipModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { PatientService } from '../../services/patient.service';
+import { ResultService } from '../../services/result.service';
 import { Patient } from '../../models/Patient';
+import { Result } from '../../models/Result';
 import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
@@ -25,7 +27,20 @@ export class PatientControlComponent implements OnInit {
   // Texto de búsqueda
   searchTerm: string = '';
 
-  constructor(private patientService: PatientService) {}
+  // Para el modal de historial
+  selectedPatient: Patient | null = null;
+  patientResults: Result[] = [];
+  isLoadingResults = false;
+
+  // Para el modal de edición
+  editingPatient: Patient | null = null;
+  isEditing = false;
+
+  constructor(
+    private patientService: PatientService,
+    private resultService: ResultService,
+    private modal: NgbModal
+  ) {}
 
   ngOnInit(): void {
     this.loadPatients();
@@ -77,12 +92,126 @@ export class PatientControlComponent implements OnInit {
     this.patientService.debugAllPatients().subscribe({
       next: (response) => {
         console.log('🔍 Debug todos los pacientes:', response);
-        alert(response);
       },
       error: (error) => {
         console.error('❌ Error en debug:', error);
-        alert('Error en debug: ' + error.message);
       }
     });
+  }
+
+  // Método para abrir el modal de historial
+  openHistoryModal(patient: Patient, modalTemplate: any): void {
+    this.selectedPatient = patient;
+    this.patientResults = [];
+    this.isLoadingResults = true;
+    
+    this.modal.open(modalTemplate, { 
+      size: 'lg',
+      centered: true,
+      backdrop: 'static'
+    });
+
+    // Cargar las evaluaciones del paciente
+    this.loadPatientResults(patient.id!);
+  }
+
+  // Método para cargar las evaluaciones del paciente
+  loadPatientResults(patientId: number): void {
+    this.isLoadingResults = true;
+    this.resultService.getByPatientId(patientId).subscribe({
+      next: (results) => {
+        this.patientResults = results;
+        this.isLoadingResults = false;
+        console.log(`📊 Cargadas ${results.length} evaluaciones para el paciente ${this.selectedPatient?.fullName}`);
+      },
+      error: (error) => {
+        console.error('Error cargando evaluaciones del paciente:', error);
+        this.patientResults = [];
+        this.isLoadingResults = false;
+      }
+    });
+  }
+
+  // Método para cerrar el modal
+  closeModal(): void {
+    this.modal.dismissAll();
+    this.selectedPatient = null;
+    this.patientResults = [];
+  }
+
+  // Método para exportar pacientes a Excel
+  exportToExcel(): void {
+    this.patientService.exportToExcel().subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `pacientes_${new Date().toISOString().split('T')[0]}.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        console.log('✅ Archivo Excel descargado exitosamente');
+      },
+      error: (error: any) => {
+        console.error('❌ Error exportando a Excel:', error);
+      }
+    });
+  }
+
+  // Método para abrir el modal de edición
+  openEditModal(patient: Patient, modalTemplate: any): void {
+    this.editingPatient = { ...patient }; // Crear una copia para editar
+    this.isEditing = true;
+    this.modal.open(modalTemplate, {
+      size: 'md',
+      centered: true,
+      backdrop: 'static'
+    });
+  }
+
+  // Método para guardar los cambios del paciente
+  savePatientChanges(): void {
+    if (this.editingPatient) {
+      this.patientService.update(this.editingPatient.id!, this.editingPatient).subscribe({
+        next: () => {
+          console.log('✅ Paciente actualizado exitosamente');
+          this.loadPatients(); // Recargar la lista
+          this.closeEditModal();
+        },
+        error: (error: any) => {
+          console.error('❌ Error actualizando paciente:', error);
+        }
+      });
+    }
+  }
+
+  // Método para cerrar el modal de edición
+  closeEditModal(): void {
+    this.modal.dismissAll();
+    this.editingPatient = null;
+    this.isEditing = false;
+  }
+
+  // Método para exportar historial de evaluaciones del paciente a Excel
+  exportPatientHistoryToExcel(): void {
+    if (this.patientResults && this.patientResults.length > 0 && this.selectedPatient?.id) {
+      this.resultService.exportPatientHistoryToExcel(this.selectedPatient.id).subscribe({
+        next: (blob: Blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          const patientName = this.selectedPatient?.fullName?.replace(/\s+/g, '_') || 'paciente';
+          link.download = `historial_${patientName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+          console.log('✅ Historial de evaluaciones exportado exitosamente');
+        },
+        error: (error: any) => {
+          console.error('❌ Error exportando historial:', error);
+          alert('Error al exportar el historial de evaluaciones');
+        }
+      });
+    } else {
+      alert('No hay evaluaciones para exportar');
+    }
   }
 }

@@ -24,7 +24,7 @@
     </div>
     <div class="d-flex gap-2">
       
-      <button class="btnGreen" ngbTooltip="Exportar información a Excel">
+      <button class="btnGreen" ngbTooltip="Exportar información a Excel" (click)="exportToExcel()">
         Exportar
       </button>
       <button
@@ -81,11 +81,12 @@
             <td>
               <div class="d-flex justify-content-center">
                 <button 
-                  class="btn btn-sm btn-link text-success" 
+                  class="btn btn-sm detail-btn" 
                   ngbTooltip="Ver detalles"
                   (click)="viewResult(watchResult,result)"
                 >
-                  <i class="bi bi-file-earmark-text fs-4"></i>
+                  <i class="bi bi-file-earmark-text me-1"></i>
+                  Ver
                 </button>
                 
               </div>
@@ -94,7 +95,9 @@
             <td>{{ result.patient?.fullName || 'Paciente no registrado' }}</td>
             <td>{{ result.test.title }}</td>
             <td class="text-center">
-              <span class="score-chip">{{ result.totalScore }}</span>
+              <span class="badge fs-6" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; padding: 8px 12px; border-radius: 20px;">
+                {{ result.totalScore || 0 }} pts
+              </span>
             </td>
           </tr>
         </tbody>
@@ -114,12 +117,14 @@
   <div watchTest class="modal-content modalCustom">
     <div class="modal-content">
       <!-- Header -->
-      <div class="modal-header modalCustom">
-        <span><img src="/logo-blanco.png" alt="" width="110px" /></span>
+      <div class="modal-header" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; border-bottom: none;">
+        <div class="d-flex align-items-center">
+          <img src="/logo-blanco.png" alt="Logo MoCA" style="height: 50px; width: auto;">
+        </div>
         <button
           type="button"
           (click)="modal.close('Close click')"
-          class="btn-close"
+          class="btn-close btn-close-white"
           aria-label="Close"
         ></button>
       </div>
@@ -158,10 +163,10 @@
 <ng-template #watchResult let-modal>
   <div class="modal-content modalCustom">
     <!-- Header -->
-    <div class="modal-header modalCustom">
-      <h4 class="modal-title ms-3 text-white">
-        Detalles de la Evaluación
-      </h4>
+    <div class="modal-header" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; border-bottom: none;">
+      <div class="d-flex align-items-center">
+        <img src="/logo-blanco.png" alt="Logo MoCA" style="height: 50px; width: auto;">
+      </div>
       <button
         type="button"
         (click)="modal.close('Close click')"
@@ -185,12 +190,14 @@
           </p>
           <p class="text-muted">
             <strong>Puntaje Total:</strong> 
-            <span class="ms-2 badge bg-success fs-6">{{ selectedResult.totalScore }} puntos</span>
+            <span class="ms-2 badge fs-6" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; padding: 8px 12px; border-radius: 20px;">{{ selectedResult.totalScore }} puntos</span>
           </p>
         </div>
         <div class="col-md-6">
           <div class="d-flex justify-content-end align-items-center">
-            <span class="score-chip score-chip-lg">{{ selectedResult.totalScore }}</span>
+            <span class="badge fs-4" style="background: linear-gradient(135deg, #00804e, #00b377); color: white; padding: 12px 16px; border-radius: 25px; font-weight: 600;">
+              {{ selectedResult.totalScore }} pts
+            </span>
           </div>
         </div>
       </div>
