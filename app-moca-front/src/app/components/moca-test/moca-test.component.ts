@@ -44,6 +44,9 @@ export class MocaTestComponent implements OnInit {
   evaluationScore: number | null = null;
   evaluationNotes = '';
   
+  // Score validation state
+  showScoreWarning = false;
+  
   // State management
   isLoading = false;
   errorMessage = '';
@@ -155,6 +158,9 @@ export class MocaTestComponent implements OnInit {
     this.currentQuestion = this.questions[this.currentQuestionIndex];
     this.currentQuestionNumber = this.currentQuestionIndex + 1;
     
+    // Reset warning state
+    this.showScoreWarning = false;
+    
     // Cargar respuesta guardada si existe
     const savedAnswer = this.answers.find(a => a.questionId === this.currentQuestion.id);
     if (savedAnswer) {
@@ -251,6 +257,30 @@ export class MocaTestComponent implements OnInit {
   // Getters para el template
   get maxScore(): number {
     return this.currentQuestion?.maxScore || 10;
+  }
+
+  // Manejar input en tiempo real
+  onScoreInput(event: any): void {
+    const value = parseInt(event.target.value);
+    if (!isNaN(value)) {
+      if (value > this.maxScore) {
+        this.showScoreWarning = true;
+        // Usar setTimeout para que Angular detecte el cambio
+        setTimeout(() => {
+          this.evaluationScore = this.maxScore;
+        }, 0);
+        // Ocultar la advertencia después de 3 segundos
+        setTimeout(() => {
+          this.showScoreWarning = false;
+        }, 3000);
+      } else if (value < 0) {
+        setTimeout(() => {
+          this.evaluationScore = 0;
+        }, 0);
+      } else {
+        this.showScoreWarning = false;
+      }
+    }
   }
 
   get canGoNext(): boolean {

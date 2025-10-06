@@ -708,6 +708,26 @@
   color: #5a6c7d;
 }
 
+.score-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  color: #856404;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.score-warning i {
+  color: #f39c12;
+  font-size: 1rem;
+}
+
 .notes-section {
   text-align: left;
 }

@@ -85,3 +85,94 @@
   outline: none;
   box-shadow: none;
 }
+
+/* Contenedor del botón de logout */
+.logout-container {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 10px;
+}
+
+/* En pantallas pequeñas y tablets, mover a la izquierda */
+@media (max-width: 991px) {
+  .logout-container {
+    margin-left: 0;
+    margin-right: auto;
+    order: -1; /* Mover antes del botón hamburguesa */
+  }
+}
+
+/* Botón de logout */
+.btn-logout {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 400;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.btn-logout:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 1;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-logout:hover i {
+  color: rgba(255, 255, 255, 1); /* Blanco más intenso en hover */
+}
+
+.btn-logout:focus {
+  outline: none;
+  box-shadow: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.btn-logout:focus i {
+  color: rgba(255, 255, 255, 1); /* Blanco más intenso en focus */
+}
+
+.btn-logout i {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9); /* Blanco para el icono */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Sombra sutil para mejor contraste */
+}
+
+.logout-text {
+  display: none;
+}
+
+/* Mostrar texto en pantallas más grandes */
+@media (min-width: 992px) {
+  .logout-text {
+    display: inline;
+  }
+  
+  .btn-logout {
+    padding: 8px 16px;
+  }
+}
+
+/* En móviles, solo mostrar el icono */
+@media (max-width: 767px) {
+  .logout-container {
+    margin-right: 5px;
+  }
+  
+  .btn-logout {
+    padding: 6px;
+    min-width: 32px;
+    justify-content: center;
+  }
+}

@@ -211,11 +211,16 @@
                   type="number" 
                   class="score-input"
                   [(ngModel)]="evaluationScore"
+                  (input)="onScoreInput($event)"
                   [min]="0"
                   [max]="maxScore"
                   placeholder="0"
                 />
                 <span class="score-max">/ {{ maxScore }}</span>
+              </div>
+              <div *ngIf="showScoreWarning" class="score-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                <span>La puntuación máxima es {{ maxScore }}</span>
               </div>
             </div>
 

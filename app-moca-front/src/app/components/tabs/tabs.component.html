@@ -2,6 +2,13 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="#"></a>
 
+    <!-- Botón de logout -->
+    <div class="logout-container">
+      <button class="btn-logout" (click)="logout()" title="Cerrar sesión">
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
+    </div>
+
     <!-- Botón hamburguesa -->
     <button class="navbar-toggler" type="button" (click)="isCollapsed = !isCollapsed" 
             aria-controls="navbarTabs" aria-expanded="!isCollapsed" aria-label="Toggle navigation">

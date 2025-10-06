@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -13,4 +13,15 @@ import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 export class TabsComponent {
 
   isCollapsed = true;
+
+  constructor(private router: Router) {}
+
+  logout(): void {
+    // Limpiar datos de sesión si es necesario
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Navegar al login principal
+    this.router.navigate(['/login']);
+  }
 }
