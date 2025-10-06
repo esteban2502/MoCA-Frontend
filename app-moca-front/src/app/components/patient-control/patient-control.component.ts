@@ -35,13 +35,17 @@ export class PatientControlComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.patientService.list().subscribe({
+    console.log('🔍 Cargando pacientes del usuario autenticado...');
+    
+    this.patientService.getMyPatients().subscribe({
       next: (data) => {
+        console.log('✅ Pacientes cargados:', data);
+        console.log('📊 Total de pacientes:', data.length);
         this.patients = data;
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error cargando pacientes:', error);
+        console.error('❌ Error cargando pacientes:', error);
         this.errorMessage = 'Error al cargar los pacientes';
         this.isLoading = false;
       }
@@ -67,5 +71,18 @@ export class PatientControlComponent implements OnInit {
   clearSearch(): void {
     this.searchTerm = '';
     this.p = 1;
+  }
+
+  debugAllPatients(): void {
+    this.patientService.debugAllPatients().subscribe({
+      next: (response) => {
+        console.log('🔍 Debug todos los pacientes:', response);
+        alert(response);
+      },
+      error: (error) => {
+        console.error('❌ Error en debug:', error);
+        alert('Error en debug: ' + error.message);
+      }
+    });
   }
 }

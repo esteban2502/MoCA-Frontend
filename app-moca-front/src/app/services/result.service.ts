@@ -17,6 +17,10 @@ export class ResultService {
     return this.http.get<Result[]>(this.apiUrl);
   }
 
+  getMyResults(): Observable<Result[]> {
+    return this.http.get<Result[]>(`${this.apiUrl}/my-results`);
+  }
+
   getById(id: number): Observable<Result> {
     return this.http.get<Result>(`${this.apiUrl}/${id}`);
   }

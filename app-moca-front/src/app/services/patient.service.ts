@@ -14,12 +14,20 @@ export class PatientService {
     return this.http.get<Patient[]>(this.apiUrl);
   }
 
+  getMyPatients(): Observable<Patient[]> {
+    return this.http.get<Patient[]>(`${this.apiUrl}/my-patients`);
+  }
+
   create(payload: Partial<Patient>): Observable<Patient> {
     return this.http.post<Patient>(`${this.apiUrl}/register`, payload);
   }
 
   findByDocument(document: string): Observable<Patient> {
     return this.http.get<Patient>(`${this.apiUrl}/cedula/${document}`);
+  }
+
+  debugAllPatients(): Observable<string> {
+    return this.http.get<string>(`${this.apiUrl}/debug-all-patients`);
   }
 }
 

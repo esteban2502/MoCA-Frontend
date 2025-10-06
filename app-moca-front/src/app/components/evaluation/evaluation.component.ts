@@ -42,6 +42,9 @@ export class EvaluationComponent implements OnInit {
   itemsPerPage: number = 5; 
   p: number = 1;
 
+  // Texto de búsqueda para evaluaciones
+  searchTerm: string = '';
+
   testList: Test[] = [];
 
   getAllTests() {
@@ -58,7 +61,7 @@ export class EvaluationComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.resultService.getAll().subscribe({
+    this.resultService.getMyResults().subscribe({
       next: (data) => {
         this.results = data;
         this.isLoading = false;
@@ -134,5 +137,32 @@ export class EvaluationComponent implements OnInit {
         }
       });
     }
+  }
+
+  // Lista filtrada por paciente, test, fecha (insensible a mayúsculas)
+  get filteredResults(): Result[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.results;
+    return this.results.filter((result) => {
+      const patientName = (result.patient?.fullName || '').toLowerCase();
+      const patientId = (result.patient?.documentNumber || '').toString().toLowerCase();
+      const testName = (result.test?.title || '').toLowerCase();
+      const date = result.evaluationDate ? new Date(result.evaluationDate).toLocaleDateString('es-ES').toLowerCase() : '';
+      
+      return patientName.includes(term) || 
+             patientId.includes(term) || 
+             testName.includes(term) || 
+             date.includes(term);
+    });
+  }
+
+  onSearchChange(): void {
+    // Reiniciar a la primera página al cambiar el filtro
+    this.p = 1;
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.p = 1;
   }
 }
