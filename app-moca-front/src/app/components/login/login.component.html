@@ -11,12 +11,18 @@
         <div class="col-12 mb-3">
           <input
             class="form-control"
+            [class.is-invalid]="emailError"
             placeholder="Correo electrónico"
             type="email"
             [(ngModel)]="email"
             name="email"
             required
+            #emailInput="ngModel"
+            pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
           />
+          <div *ngIf="emailError" class="invalid-feedback">
+            {{ emailError }}
+          </div>
         </div>
 
         <div class="col-12 mb-3">

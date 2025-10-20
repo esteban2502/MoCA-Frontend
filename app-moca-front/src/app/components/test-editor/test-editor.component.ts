@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { TabsComponent } from '../tabs/tabs.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TestService } from '../../services/test.service';
 import { Test } from '../../models/Test';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { AuthService } from '../../services/auth.service';
@@ -25,12 +25,15 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './test-editor.component.css',
 })
 export class TestEditorComponent implements OnInit {
-  constructor(private modal: NgbModal, private testService: TestService, private authService: AuthService) {}
+  @ViewChild('errorModal', { static: true }) errorModal!: TemplateRef<any>;
+
+  constructor(private modal: NgbModal, private testService: TestService, private authService: AuthService, private router: Router) {}
 
   testList: Test[] = [];
   newTest: Test = { title: '', description: '', status: true };
   idAux: number = 0;
   mode: 'create' | 'edit' = 'create';
+  testToDelete: Test | null = null;
 
   ngOnInit(): void {
     this.getAllTests();
@@ -98,6 +101,17 @@ export class TestEditorComponent implements OnInit {
   }
 
   deleteTest(id: number): void {
+    // Buscar la prueba en la lista para verificar si tiene preguntas
+    const test = this.testList.find(t => t.id === id);
+    
+    if (test && test.numQuestions && test.numQuestions > 0) {
+      // Si la prueba tiene preguntas, mostrar modal de error
+      this.testToDelete = test;
+      this.modal.dismissAll(); // Cerrar modal de confirmación
+      this.openErrorModal();
+      return;
+    }
+    
     this.testService.deleteById(id).subscribe({
       next: () => {
         this.getAllTests();
@@ -106,6 +120,17 @@ export class TestEditorComponent implements OnInit {
       }, // refresca lista
       error: (err) => console.error('Error al eliminar test:', err),
     });
+  }
+
+  openErrorModal(): void {
+    this.modal.open(this.errorModal, { size: 'md', ariaLabelledBy: 'error-modal-title' });
+  }
+
+  goToQuestions(): void {
+    if (this.testToDelete?.id) {
+      // Navegar a la página de preguntas de la prueba
+      this.router.navigate(['/preguntas', this.testToDelete.id]);
+    }
   }
 
   changeStatus(id?: number): void {

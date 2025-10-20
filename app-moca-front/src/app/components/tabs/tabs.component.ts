@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
-import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-tabs',
-  imports: [RouterLink,CommonModule,NgbCollapseModule],
+  imports: [RouterLink,CommonModule,NgbCollapseModule,NgbTooltipModule],
   standalone:true,
   templateUrl: './tabs.component.html',
   styleUrl: './tabs.component.css'

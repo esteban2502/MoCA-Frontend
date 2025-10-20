@@ -18,16 +18,33 @@ export class LoginComponent {
   password = '';
   isLoading = false;
   errorMessage = '';
+  emailError = '';
 
   constructor(private authService: AuthService, private router: Router) {}
 
+  private validateEmail(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  }
+
   async onSubmit(): Promise<void> {
+    // Limpiar errores previos
+    this.emailError = '';
+    this.errorMessage = '';
+
+    // Validar que los campos no estén vacíos
     if (!this.email.trim() || !this.password.trim()) {
       this.errorMessage = 'Ingrese correo y contraseña';
       return;
     }
+
+    // Validar formato de email
+    if (!this.validateEmail(this.email)) {
+      this.emailError = 'Ingrese un formato de correo electrónico válido';
+      return;
+    }
+    
     this.isLoading = true;
-    this.errorMessage = '';
 
     const payload: AuthLoginRequest = { email: this.email, password: this.password };
     try {

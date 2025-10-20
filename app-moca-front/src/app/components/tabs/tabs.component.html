@@ -4,7 +4,13 @@
 
     <!-- Botón de logout -->
     <div class="logout-container">
-      <button class="btn-logout" (click)="logout()" title="Cerrar sesión">
+      <button 
+        class="btn-logout" 
+        (click)="logout()" 
+        ngbTooltip="Cerrar sesión"
+        placement="right"
+        [disableTooltip]="false"
+      >
         <i class="bi bi-box-arrow-right"></i>
       </button>
     </div>
