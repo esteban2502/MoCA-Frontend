@@ -21,7 +21,14 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     const token = localStorage.getItem('token');
-    return !!token;
+    if (!token) return false;
+    
+    // Verificar si el token está expirado
+    const decoded = this.parseJwt(token);
+    if (!decoded || !decoded.exp) return false;
+    
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decoded.exp > currentTime;
   }
 
   getToken(): string | null {
