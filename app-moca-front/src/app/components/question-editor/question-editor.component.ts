@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { TabsComponent } from '../tabs/tabs.component';
 import { NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivatedRoute } from '@angular/router';
@@ -37,6 +37,8 @@ export class QuestionEditorComponent implements OnInit {
   idAux: number = 0;
   mode: 'create' | 'edit' = 'create';
   errorMessage: string = '';
+  deleteErrorMessage: string = '';
+  @ViewChild('errorAlertModal') errorAlertModal!: TemplateRef<any>;
 
   constructor(
     private modal: NgbModal,
@@ -167,9 +169,36 @@ export class QuestionEditorComponent implements OnInit {
         this.idAux = 0;
         this.modal.dismissAll();
       },
-      error: (err) => console.error('Error al eliminar pregunta:', err),
+      error: (err) => {
+        console.error('Error al eliminar pregunta:', err);
+        if (err.status !== 401) {
+          this.deleteErrorMessage = this.extractErrorMessage(err);
+          // Cerrar el modal de confirmación primero
+          this.modal.dismissAll();
+          // Abrir modal de error después de cerrar el modal de confirmación
+          setTimeout(() => {
+            if (this.errorAlertModal) {
+              this.modal.open(this.errorAlertModal, { size: 'md', ariaLabelledBy: 'error-modal-title' });
+            }
+          }, 150);
+        }
+      },
     });
   }
 
-  
+  private extractErrorMessage(err: any): string {
+    if (!err) {
+      return 'No se puede eliminar la pregunta porque ya fue utilizada en una evaluación.';
+    }
+
+    if (typeof err.error === 'string' && err.error.trim().length > 0) {
+      return err.error;
+    }
+
+    if (err.error && typeof err.error.message === 'string') {
+      return err.error.message;
+    }
+
+    return 'No se puede eliminar la pregunta porque ya fue utilizada en una evaluación.';
+  }
 }

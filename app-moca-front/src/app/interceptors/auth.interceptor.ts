@@ -22,12 +22,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       catchError((error: HttpErrorResponse) => {
         console.log('🔍 Auth Interceptor - Error capturado:', error.status);
         
-        // Si el error es 401 (Unauthorized) o 403 (Forbidden), el token es inválido
-        if (error.status === 401 || error.status === 403) {
+        // Si es 401, el token es inválido, cerrar sesión
+        if (error.status === 401) {
           console.log('❌ Token inválido, redirigiendo al login');
           authService.logout();
           router.navigate(['/login']);
         }
+
+        // Para 403 u otros errores, dejar que el componente maneje la respuesta
         
         return throwError(() => error);
       })
