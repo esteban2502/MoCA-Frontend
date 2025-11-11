@@ -20,43 +20,6 @@ La plataforma web permite la digitalización de la prueba cognitiva, lo que posi
 - **Seguimiento**: Visualización y análisis de resultados históricos.
 - **Administrador**: Gestión de usuarios y configuración del sistema.
 
-## 📁 Estructura del proyecto
-
-```
-├── app/
-│ ├── components/
-│ ├── services/
-│ ├── models/
-│ └── app-routing.module.ts
-├── assets/
-└── environments/
-```
-
-## 🏗️ Arquitectura de la plataforma
-![Diagrama de arquitectura](docs/Arquitectura%20de%20la%20plataforma.jpg)
-
-## 🎨 Prototipos Iniciales
-
-### Inicio de sesión
-![Inicio de sesion](docs/Inicio%20de%20sesion.jpg)
-
-### Configuración de pruebas
-![Configuracion de pruebas](docs/configuracion%20de%20pruebas.jpg)
-
-![Configuracion de pruebas](docs/configuracion%20de%20pruebas%20modal%20.jpg)
-
-### Configuración de preguntas
-![Configuracion de preguntas](docs/configuracion%20de%20preguntas.jpg)
-
-![Configuracion de preguntas](docs/configuracion%20de%20preguntas%20modal.jpg)
-
-### Seguimiento y control
-
-![Seguimiento y Control](docs/seguimiento%20y%20control.jpg)
-
-![Seguimiento y Control](docs/seguimiento%20y%20control%20modal.jpg)
-
-![Historial de evaluación](docs/Historial%20de%20evaluaciones.jpg)
 
 
 ## 👨‍💻 Autores
