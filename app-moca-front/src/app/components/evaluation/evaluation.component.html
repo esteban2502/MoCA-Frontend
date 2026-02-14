@@ -229,7 +229,21 @@
                 {{ answer.question.description }}
               </p>
               
-              
+              <!-- Dibujo guardado (si es pregunta de dibujar) -->
+              <div *ngIf="answer.question && answer.question.isDrawing && answer.userAnswer" class="mb-3">
+                <label class="form-label fw-semibold text-success">
+                  <i class="bi bi-pencil me-1"></i>
+                  Dibujo Realizado:
+                </label>
+                <div class="p-3 bg-light rounded border border-success">
+                  <img 
+                    [src]="answer.userAnswer" 
+                    alt="Dibujo de la respuesta"
+                    class="img-fluid rounded"
+                    style="max-width: 100%; height: auto; border: 1px solid #dee2e6;"
+                  />
+                </div>
+              </div>
 
               <!-- Puntaje obtenido -->
               <div class="row mb-3">

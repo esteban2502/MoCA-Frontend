@@ -1018,6 +1018,103 @@
   }
 }
 
+/* Drawing Area Styles */
+.drawing-area {
+  margin-top: 30px;
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 20px;
+  border: 2px solid rgba(0, 128, 78, 0.1);
+}
+
+.drawing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.drawing-title {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drawing-title i {
+  color: var(--green);
+  font-size: 1.3rem;
+}
+
+.drawing-tools {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-tool-drawing {
+  background: var(--white);
+  border: 2px solid rgba(0, 128, 78, 0.3);
+  color: #5a6c7d;
+  width: 45px;
+  height: 45px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.btn-tool-drawing:hover {
+  background: rgba(0, 128, 78, 0.1);
+  border-color: var(--green);
+  transform: scale(1.05);
+}
+
+.btn-tool-drawing.active {
+  background: var(--green);
+  color: white;
+  border-color: var(--green);
+}
+
+.canvas-container {
+  width: 100%;
+  background: white;
+  border: 2px solid rgba(0, 128, 78, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 650px;
+  overflow: auto;
+}
+
+.drawing-canvas {
+  cursor: crosshair;
+  touch-action: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: auto;
+}
+
+.drawing-canvas:active {
+  cursor: crosshair;
+}
+
 /* Responsive for Evaluation Area */
 @media (max-width: 768px) {
   .evaluation-content {
@@ -1035,5 +1132,26 @@
   
   .evaluation-area {
     padding: 15px;
+  }
+
+  .drawing-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .drawing-tools {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .canvas-container {
+    padding: 15px;
+    min-height: 500px;
+  }
+
+  .drawing-canvas {
+    width: 100% !important;
+    max-width: 100%;
+    height: auto !important;
   }
 }

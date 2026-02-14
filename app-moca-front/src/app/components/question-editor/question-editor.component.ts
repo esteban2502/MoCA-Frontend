@@ -31,6 +31,8 @@ export class QuestionEditorComponent implements OnInit {
     description: '',
     questionOrder: 1,
     maxScore: 1,
+    isDrawing: false,
+    status: true,
     test: { id: this.testId },
     category: { id: 0 }
   };
@@ -80,6 +82,8 @@ export class QuestionEditorComponent implements OnInit {
         description: '',
         questionOrder: 1,
         maxScore: 1,
+        isDrawing: false,
+        status: true,
         test: { id: this.testId },
         category: { id: 0 }
       };
@@ -182,6 +186,17 @@ export class QuestionEditorComponent implements OnInit {
             }
           }, 150);
         }
+      },
+    });
+  }
+
+  changeStatus(id: number): void {
+    this.questionService.changeStatus(id).subscribe({
+      next: () => {
+        this.getAllQuestions();
+      },
+      error: (err) => {
+        console.error('Error cambiando estado de pregunta:', err);
       },
     });
   }

@@ -28,5 +28,13 @@ export class QuestionService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  changeStatus(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/status`, {});
+  }
+
+  getActiveByTestId(testId: number): Observable<Question[]> {
+    return this.http.get<Question[]>(`${this.apiUrl}/test/${testId}/active`);
+  }
   
 }

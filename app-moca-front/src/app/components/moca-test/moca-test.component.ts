@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -28,7 +28,9 @@ interface LocalAnswer {
   templateUrl: './moca-test.component.html',
   styleUrl: './moca-test.component.css',
 })
-export class MocaTestComponent implements OnInit {
+export class MocaTestComponent implements OnInit, AfterViewInit {
+  @ViewChild('drawingCanvas') drawingCanvas!: ElementRef<HTMLCanvasElement>;
+  
   testId!: number;
   test!: Test;
   questions: Question[] = [];
@@ -53,6 +55,14 @@ export class MocaTestComponent implements OnInit {
   
   // Answers storage
   answers: LocalAnswer[] = [];
+  
+  // Drawing canvas properties
+  private canvasContext!: CanvasRenderingContext2D | null;
+  private isDrawing = false;
+  private lastX = 0;
+  private lastY = 0;
+  drawingTool: 'pen' | 'eraser' = 'pen';
+  private lineWidth = 3;
 
   // Patient selection
   selectedPatient: Patient | null = null;
@@ -92,14 +102,24 @@ export class MocaTestComponent implements OnInit {
     this.loadTestData();
   }
 
+  ngAfterViewInit(): void {
+    // Initialize canvas after view is ready (solo si hay una pregunta de dibujo)
+    if (this.currentQuestion?.isDrawing) {
+      setTimeout(() => {
+        this.initializeCanvas();
+        this.loadDrawingFromAnswer();
+      }, 200);
+    }
+  }
+
   loadTestData(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Cargar datos del test y preguntas en paralelo
+    // Cargar datos del test y preguntas activas en paralelo
     Promise.all([
       firstValueFrom(this.testService.getAll()),
-      firstValueFrom(this.questionService.getAllByTestId(this.testId))
+      firstValueFrom(this.questionService.getActiveByTestId(this.testId))
     ]).then(([tests, questions]) => {
       if (tests && questions) {
         this.test = tests.find(t => t.id === this.testId)!;
@@ -172,9 +192,33 @@ export class MocaTestComponent implements OnInit {
       this.evaluationScore = null;
       this.evaluationNotes = '';
     }
+    
+    // Initialize canvas for drawing questions
+    if (this.currentQuestion.isDrawing) {
+      // Usar setTimeout más largo para asegurar que el DOM esté completamente renderizado
+      setTimeout(() => {
+        if (this.drawingCanvas && this.currentQuestion.isDrawing) {
+          this.initializeCanvas();
+          // Cargar dibujo guardado después de inicializar
+          setTimeout(() => {
+            if (this.userAnswer) {
+              this.loadDrawingFromAnswer();
+            }
+          }, 50);
+        }
+      }, 300);
+    } else {
+      // Reset drawing tool when switching to non-drawing question
+      this.drawingTool = 'pen';
+    }
   }
 
   saveCurrentAnswer(): void {
+    // Save drawing if it's a drawing question
+    if (this.currentQuestion.isDrawing && this.canvasContext) {
+      this.saveDrawingToAnswer();
+    }
+    
     const answerIndex = this.answers.findIndex(a => a.questionId === this.currentQuestion.id);
     if (answerIndex !== -1) {
       this.answers[answerIndex] = {
@@ -377,5 +421,238 @@ export class MocaTestComponent implements OnInit {
     this.showUserForm = true;
     this.selectedPatient = null;
     this.clearForms();
+  }
+
+  // Drawing Canvas Methods
+  initializeCanvas(): void {
+    if (!this.drawingCanvas || !this.currentQuestion?.isDrawing) {
+      return;
+    }
+
+    const canvas = this.drawingCanvas.nativeElement;
+    if (!canvas) {
+      console.error('Canvas element not found');
+      return;
+    }
+
+    const container = canvas.parentElement;
+    
+    if (container) {
+      // Aumentar el tamaño del canvas para mejor espacio de dibujo
+      const containerWidth = container.clientWidth - 40; // Account for padding
+      const maxWidth = 900; // Ancho máximo recomendado
+      const minWidth = 600; // Ancho mínimo
+      
+      const canvasWidth = Math.max(minWidth, Math.min(maxWidth, containerWidth));
+      const canvasHeight = 600; // Altura aumentada para mejor espacio de dibujo
+      
+      // Establecer el tamaño real del canvas (sin escalado CSS)
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      
+      // El tamaño CSS debe coincidir con el tamaño real para evitar problemas de escalado
+      canvas.style.width = canvasWidth + 'px';
+      canvas.style.height = canvasHeight + 'px';
+    }
+
+    this.canvasContext = canvas.getContext('2d');
+    if (!this.canvasContext) {
+      console.error('Could not get 2D context from canvas');
+      return;
+    }
+
+    // Configurar el contexto del canvas
+    this.canvasContext.strokeStyle = '#000000';
+    this.canvasContext.lineWidth = this.lineWidth;
+    this.canvasContext.lineCap = 'round';
+    this.canvasContext.lineJoin = 'round';
+    this.canvasContext.globalCompositeOperation = 'source-over';
+    
+    // Set white background
+    this.canvasContext.fillStyle = '#ffffff';
+    this.canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Asegurar que el tool esté configurado correctamente
+    this.setDrawingTool(this.drawingTool);
+  }
+
+  startDrawing(event: MouseEvent): void {
+    // Verificar que todo esté listo
+    if (!this.drawingCanvas || !this.currentQuestion?.isDrawing) {
+      // Si el canvas no está inicializado, intentar inicializarlo
+      if (this.currentQuestion?.isDrawing && this.drawingCanvas) {
+        this.initializeCanvas();
+        // Esperar un momento para que se inicialice
+        setTimeout(() => {
+          this.startDrawing(event);
+        }, 50);
+        return;
+      }
+      return;
+    }
+    
+    if (!this.canvasContext) {
+      this.initializeCanvas();
+      if (!this.canvasContext) return;
+    }
+    
+    event.preventDefault();
+    event.stopPropagation();
+    
+    this.isDrawing = true;
+    const canvas = this.drawingCanvas.nativeElement;
+    const rect = canvas.getBoundingClientRect();
+    
+    // Calcular coordenadas relativas al canvas
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    // Si hay escalado CSS, ajustar las coordenadas
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    this.lastX = x * scaleX;
+    this.lastY = y * scaleY;
+    
+    // Iniciar el trazo desde este punto y dibujar un punto inicial
+    this.canvasContext.beginPath();
+    this.canvasContext.moveTo(this.lastX, this.lastY);
+    this.canvasContext.lineTo(this.lastX + 0.1, this.lastY + 0.1); // Pequeño punto inicial
+    this.canvasContext.stroke();
+  }
+
+  draw(event: MouseEvent): void {
+    if (!this.isDrawing || !this.canvasContext || !this.currentQuestion?.isDrawing) {
+      return;
+    }
+    
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const canvas = this.drawingCanvas.nativeElement;
+    const rect = canvas.getBoundingClientRect();
+    
+    // Calcular coordenadas relativas al canvas
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    // Si hay escalado CSS, ajustar las coordenadas
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const currentX = x * scaleX;
+    const currentY = y * scaleY;
+
+    // Dibujar línea desde la última posición a la actual
+    this.canvasContext.lineTo(currentX, currentY);
+    this.canvasContext.stroke();
+
+    this.lastX = currentX;
+    this.lastY = currentY;
+  }
+
+  stopDrawing(): void {
+    if (this.isDrawing && this.currentQuestion.isDrawing) {
+      this.saveDrawingToAnswer();
+    }
+    this.isDrawing = false;
+  }
+
+  startDrawingTouch(event: TouchEvent): void {
+    if (!this.canvasContext || !this.currentQuestion.isDrawing) return;
+    
+    event.preventDefault();
+    this.isDrawing = true;
+    const canvas = this.drawingCanvas.nativeElement;
+    const touch = event.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    
+    // Calcular coordenadas relativas al canvas
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    // Si hay escalado CSS, ajustar las coordenadas
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    this.lastX = x * scaleX;
+    this.lastY = y * scaleY;
+    
+    // Iniciar el trazo desde este punto
+    this.canvasContext.beginPath();
+    this.canvasContext.moveTo(this.lastX, this.lastY);
+  }
+
+  drawTouch(event: TouchEvent): void {
+    if (!this.isDrawing || !this.canvasContext || !this.currentQuestion.isDrawing) return;
+    
+    event.preventDefault();
+    const canvas = this.drawingCanvas.nativeElement;
+    const touch = event.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    
+    // Calcular coordenadas relativas al canvas
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    // Si hay escalado CSS, ajustar las coordenadas
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const currentX = x * scaleX;
+    const currentY = y * scaleY;
+
+    // Dibujar línea desde la última posición a la actual
+    this.canvasContext.lineTo(currentX, currentY);
+    this.canvasContext.stroke();
+
+    this.lastX = currentX;
+    this.lastY = currentY;
+  }
+
+  setDrawingTool(tool: 'pen' | 'eraser'): void {
+    this.drawingTool = tool;
+    if (this.canvasContext) {
+      if (tool === 'pen') {
+        this.canvasContext.strokeStyle = '#000000';
+        this.canvasContext.globalCompositeOperation = 'source-over';
+      } else {
+        this.canvasContext.strokeStyle = '#ffffff';
+        this.canvasContext.globalCompositeOperation = 'destination-out';
+      }
+    }
+  }
+
+  clearCanvas(): void {
+    if (!this.canvasContext || !this.drawingCanvas) return;
+    
+    const canvas = this.drawingCanvas.nativeElement;
+    this.canvasContext.fillStyle = '#ffffff';
+    this.canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+    this.userAnswer = '';
+  }
+
+  saveDrawingToAnswer(): void {
+    if (!this.drawingCanvas || !this.currentQuestion.isDrawing) return;
+    
+    const canvas = this.drawingCanvas.nativeElement;
+    const imageData = canvas.toDataURL('image/png');
+    this.userAnswer = imageData;
+  }
+
+  loadDrawingFromAnswer(): void {
+    if (!this.userAnswer || !this.canvasContext || !this.drawingCanvas || !this.currentQuestion.isDrawing) {
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = this.drawingCanvas.nativeElement;
+      if (this.canvasContext) {
+        this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        this.canvasContext.drawImage(img, 0, 0);
+      }
+    };
+    img.src = this.userAnswer;
   }
 }
