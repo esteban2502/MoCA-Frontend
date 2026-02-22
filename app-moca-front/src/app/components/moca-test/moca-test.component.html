@@ -179,114 +179,129 @@
         </div>
       </div>
 
-      <!-- Question Content -->
-      <div class="question-content">
-        <div class="question-text">
-          <h2 class="question-title">{{ currentQuestion.question }}</h2>
-          <p *ngIf="currentQuestion.description" class="question-instructions">
-            {{ currentQuestion.description }}
-          </p>
-        </div>
+      <!-- Question Content: flex cuando hay imagen de apoyo (izq: contenido, der: imagen) -->
+      <div class="question-content" [class.question-content-with-support-image]="currentQuestion.supportImage">
+        <div class="question-content-left">
+          <div class="question-text">
+            <h2 class="question-title">{{ currentQuestion.question }}</h2>
+            <p *ngIf="currentQuestion.description" class="question-instructions">
+              {{ currentQuestion.description }}
+            </p>
+          </div>
 
-        <!-- Drawing Canvas Area (only for drawing questions) -->
-        <div *ngIf="currentQuestion.isDrawing" class="drawing-area">
-          <div class="drawing-header">
-            <h3 class="drawing-title">
-              <i class="bi bi-pencil"></i>
-              Área de Dibujo
-            </h3>
-            <div class="drawing-tools">
-              <button 
-                type="button"
-                class="btn-tool-drawing" 
-                [class.active]="drawingTool === 'pen'"
-                (click)="setDrawingTool('pen')"
-                title="Lápiz"
-              >
+          <!-- Drawing Canvas Area (only for drawing questions) -->
+          <div *ngIf="currentQuestion.isDrawing" class="drawing-area">
+            <div class="drawing-header">
+              <h3 class="drawing-title">
                 <i class="bi bi-pencil"></i>
-              </button>
-              <button 
-                type="button"
-                class="btn-tool-drawing" 
-                [class.active]="drawingTool === 'eraser'"
-                (click)="setDrawingTool('eraser')"
-                title="Borrador"
-              >
-                <i class="bi bi-eraser"></i>
-              </button>
-              <button 
-                type="button"
-                class="btn-tool-drawing" 
-                (click)="clearCanvas()"
-                title="Limpiar"
-              >
-                <i class="bi bi-x-circle"></i>
-              </button>
+                Área de Dibujo
+              </h3>
+              <div class="drawing-tools">
+                <button 
+                  type="button"
+                  class="btn-tool-drawing" 
+                  [class.active]="drawingTool === 'pen'"
+                  (click)="setDrawingTool('pen')"
+                  title="Lápiz"
+                >
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button 
+                  type="button"
+                  class="btn-tool-drawing" 
+                  [class.active]="drawingTool === 'eraser'"
+                  (click)="setDrawingTool('eraser')"
+                  title="Borrador"
+                >
+                  <i class="bi bi-eraser"></i>
+                </button>
+                <button 
+                  type="button"
+                  class="btn-tool-drawing" 
+                  (click)="clearCanvas()"
+                  title="Limpiar"
+                >
+                  <i class="bi bi-x-circle"></i>
+                </button>
+              </div>
+            </div>
+            <div class="canvas-container">
+              <canvas 
+                #drawingCanvas
+                class="drawing-canvas"
+                (mousedown)="startDrawing($event)"
+                (mousemove)="draw($event)"
+                (mouseup)="stopDrawing()"
+                (mouseleave)="stopDrawing()"
+                (touchstart)="startDrawingTouch($event)"
+                (touchmove)="drawTouch($event)"
+                (touchend)="stopDrawing()"
+              ></canvas>
             </div>
           </div>
-          <div class="canvas-container">
-            <canvas 
-              #drawingCanvas
-              class="drawing-canvas"
-              (mousedown)="startDrawing($event)"
-              (mousemove)="draw($event)"
-              (mouseup)="stopDrawing()"
-              (mouseleave)="stopDrawing()"
-              (touchstart)="startDrawingTouch($event)"
-              (touchmove)="drawTouch($event)"
-              (touchend)="stopDrawing()"
-            ></canvas>
+
+          <!-- Evaluation Area -->
+          <div class="evaluation-area">
+            <div class="evaluation-header">
+              <h3 class="evaluation-title">
+                <i class="fas fa-clipboard-check"></i>
+                Evaluación
+              </h3>
+            </div>
+            
+            <div class="evaluation-content">
+              <!-- Score Input -->
+              <div class="score-section">
+                <label class="score-label">
+                  <i class="fas fa-star"></i>
+                  <span>Puntuación</span>
+                </label>
+                <div class="score-input-container">
+                  <input 
+                    type="number" 
+                    class="score-input"
+                    [(ngModel)]="evaluationScore"
+                    (input)="onScoreInput($event)"
+                    [min]="0"
+                    [max]="maxScore"
+                    placeholder="0"
+                  />
+                  <span class="score-max">/ {{ maxScore }}</span>
+                </div>
+                <div *ngIf="showScoreWarning" class="score-warning">
+                  <i class="bi bi-exclamation-triangle"></i>
+                  <span>La puntuación máxima es {{ maxScore }}</span>
+                </div>
+              </div>
+
+              <!-- Notes Input -->
+              <div class="notes-section">
+                <label class="notes-label">
+                  <i class="fas fa-sticky-note"></i>
+                  <span>Apuntes del evaluador</span>
+                </label>
+                <textarea 
+                  class="notes-textarea"
+                  [(ngModel)]="evaluationNotes"
+                  placeholder="Escriba observaciones, comentarios o notas sobre la respuesta..."
+                  rows="3"
+                ></textarea>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Evaluation Area -->
-        <div class="evaluation-area">
-          <div class="evaluation-header">
-            <h3 class="evaluation-title">
-              <i class="fas fa-clipboard-check"></i>
-              Evaluación
-            </h3>
+        <!-- Imagen de apoyo (derecha), solo si la pregunta la tiene -->
+        <div class="support-image-panel" *ngIf="currentQuestion.supportImage">
+          <div class="support-image-label">
+            <i class="bi bi-image"></i>
+            <span>Imagen de apoyo</span>
           </div>
-          
-          <div class="evaluation-content">
-            <!-- Score Input -->
-            <div class="score-section">
-              <label class="score-label">
-                <i class="fas fa-star"></i>
-                <span>Puntuación</span>
-              </label>
-              <div class="score-input-container">
-                <input 
-                  type="number" 
-                  class="score-input"
-                  [(ngModel)]="evaluationScore"
-                  (input)="onScoreInput($event)"
-                  [min]="0"
-                  [max]="maxScore"
-                  placeholder="0"
-                />
-                <span class="score-max">/ {{ maxScore }}</span>
-              </div>
-              <div *ngIf="showScoreWarning" class="score-warning">
-                <i class="bi bi-exclamation-triangle"></i>
-                <span>La puntuación máxima es {{ maxScore }}</span>
-              </div>
-            </div>
-
-            <!-- Notes Input -->
-            <div class="notes-section">
-              <label class="notes-label">
-                <i class="fas fa-sticky-note"></i>
-                <span>Apuntes del evaluador</span>
-              </label>
-              <textarea 
-                class="notes-textarea"
-                [(ngModel)]="evaluationNotes"
-                placeholder="Escriba observaciones, comentarios o notas sobre la respuesta..."
-                rows="3"
-              ></textarea>
-            </div>
-          </div>
+          <img 
+            [src]="currentQuestion.supportImage" 
+            alt="Imagen de apoyo"
+            class="support-image-img"
+          />
         </div>
       </div>
     </div>

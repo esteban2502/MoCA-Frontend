@@ -9,7 +9,8 @@ export interface Question {
   maxScore?: number;
   isDrawing?: boolean;
   status?: boolean;
+  /** Imagen de apoyo (Base64), visible en evaluación */
+  supportImage?: string;
   test: TestOnlyId;
   category: CategoryOnlyId;
-
 }

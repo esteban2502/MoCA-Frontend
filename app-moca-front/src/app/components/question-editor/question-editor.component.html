@@ -179,6 +179,37 @@
               </label>
             </div>
           </div>
+
+          <!-- Imagen de apoyo -->
+          <div class="col-12 mb-3">
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="hasSupportImage"
+                [(ngModel)]="hasSupportImage"
+                (ngModelChange)="onSupportImageToggle()"
+                [disabled]="mode === 'edit'"
+              />
+              <label class="form-check-label" for="hasSupportImage">
+                Imagen de apoyo
+              </label>
+            </div>
+            <div *ngIf="hasSupportImage" class="ms-3">
+              <input
+                type="file"
+                class="form-control"
+                accept="image/*"
+                (change)="onSupportImageSelected($event)"
+                #supportInput
+              />
+              <small class="text-muted d-block mt-1">Se mostrará al evaluar la pregunta.</small>
+              <div class="mt-2 d-flex align-items-center gap-2" *ngIf="newQuestion.supportImage">
+                <img [src]="newQuestion.supportImage" alt="Vista previa" class="img-thumbnail" style="max-height: 100px;" />
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearSupportImage(); supportInput.value = ''">Quitar imagen</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

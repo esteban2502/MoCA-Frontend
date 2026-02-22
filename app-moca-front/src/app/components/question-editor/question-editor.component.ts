@@ -40,6 +40,8 @@ export class QuestionEditorComponent implements OnInit {
   mode: 'create' | 'edit' = 'create';
   errorMessage: string = '';
   deleteErrorMessage: string = '';
+  /** Si está activada la opción Imagen de apoyo (muestra el input de archivo) */
+  hasSupportImage = false;
   @ViewChild('errorAlertModal') errorAlertModal!: TemplateRef<any>;
 
   constructor(
@@ -73,10 +75,12 @@ export class QuestionEditorComponent implements OnInit {
     if (question && question.id) {
       this.idAux = question.id;
       this.newQuestion = { ...question };
+      this.hasSupportImage = !!(question.supportImage);
       this.mode = 'edit';
     } else {
       this.mode = 'create';
       this.idAux = 0;
+      this.hasSupportImage = false;
       this.newQuestion = {
         question: '',
         description: '',
@@ -85,7 +89,8 @@ export class QuestionEditorComponent implements OnInit {
         isDrawing: false,
         status: true,
         test: { id: this.testId },
-        category: { id: 0 }
+        category: { id: 0 },
+        supportImage: undefined
       };
     }
 
@@ -125,9 +130,13 @@ export class QuestionEditorComponent implements OnInit {
             description: '',
             questionOrder: 1,
             maxScore: 1,
+            isDrawing: false,
+            status: true,
             test: { id: this.testId },
-            category: { id: 0 }
+            category: { id: 0 },
+            supportImage: undefined
           };
+          this.hasSupportImage = false;
           this.modal.dismissAll();
         },
         error: (err) => {
@@ -148,9 +157,13 @@ export class QuestionEditorComponent implements OnInit {
             description: '',
             questionOrder: 1,
             maxScore: 1,
+            isDrawing: false,
+            status: true,
             test: { id: this.testId },
-            category: { id: 0 }
+            category: { id: 0 },
+            supportImage: undefined
           };
+          this.hasSupportImage = false;
           this.idAux = 0;
           this.modal.dismissAll();
         },
@@ -199,6 +212,27 @@ export class QuestionEditorComponent implements OnInit {
         console.error('Error cambiando estado de pregunta:', err);
       },
     });
+  }
+
+  onSupportImageToggle(): void {
+    if (!this.hasSupportImage) {
+      this.newQuestion.supportImage = undefined;
+    }
+  }
+
+  onSupportImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.newQuestion.supportImage = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearSupportImage(): void {
+    this.newQuestion.supportImage = undefined;
   }
 
   private extractErrorMessage(err: any): string {
