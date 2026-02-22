@@ -40,8 +40,8 @@ export class QuestionEditorComponent implements OnInit {
   mode: 'create' | 'edit' = 'create';
   errorMessage: string = '';
   deleteErrorMessage: string = '';
-  /** Si está activada la opción Imagen de apoyo (muestra el input de archivo) */
-  hasSupportImage = false;
+  /** Opción única: ninguna, dibujar, imagen de apoyo o dibujar sobre imagen */
+  questionOption: 'none' | 'drawing' | 'supportImage' | 'drawOnImage' = 'none';
   @ViewChild('errorAlertModal') errorAlertModal!: TemplateRef<any>;
 
   constructor(
@@ -71,16 +71,24 @@ export class QuestionEditorComponent implements OnInit {
   }
 
   open(content: any, question?: Question) {
-    this.errorMessage = ''; // Limpiar mensaje de error
+    this.errorMessage = '';
     if (question && question.id) {
       this.idAux = question.id;
       this.newQuestion = { ...question };
-      this.hasSupportImage = !!(question.supportImage);
+      if (question.backgroundImage && question.isDrawing) {
+        this.questionOption = 'drawOnImage';
+      } else if (question.supportImage) {
+        this.questionOption = 'supportImage';
+      } else if (question.isDrawing) {
+        this.questionOption = 'drawing';
+      } else {
+        this.questionOption = 'none';
+      }
       this.mode = 'edit';
     } else {
       this.mode = 'create';
       this.idAux = 0;
-      this.hasSupportImage = false;
+      this.questionOption = 'none';
       this.newQuestion = {
         question: '',
         description: '',
@@ -90,7 +98,8 @@ export class QuestionEditorComponent implements OnInit {
         status: true,
         test: { id: this.testId },
         category: { id: 0 },
-        supportImage: undefined
+        supportImage: undefined,
+        backgroundImage: undefined
       };
     }
 
@@ -134,9 +143,10 @@ export class QuestionEditorComponent implements OnInit {
             status: true,
             test: { id: this.testId },
             category: { id: 0 },
-            supportImage: undefined
+            supportImage: undefined,
+            backgroundImage: undefined
           };
-          this.hasSupportImage = false;
+          this.questionOption = 'none';
           this.modal.dismissAll();
         },
         error: (err) => {
@@ -161,9 +171,10 @@ export class QuestionEditorComponent implements OnInit {
             status: true,
             test: { id: this.testId },
             category: { id: 0 },
-            supportImage: undefined
+            supportImage: undefined,
+            backgroundImage: undefined
           };
-          this.hasSupportImage = false;
+          this.questionOption = 'none';
           this.idAux = 0;
           this.modal.dismissAll();
         },
@@ -214,9 +225,14 @@ export class QuestionEditorComponent implements OnInit {
     });
   }
 
-  onSupportImageToggle(): void {
-    if (!this.hasSupportImage) {
+  onQuestionOptionChange(opt: 'none' | 'drawing' | 'supportImage' | 'drawOnImage'): void {
+    this.questionOption = opt;
+    this.newQuestion.isDrawing = opt === 'drawing' || opt === 'drawOnImage';
+    if (opt !== 'supportImage') {
       this.newQuestion.supportImage = undefined;
+    }
+    if (opt !== 'drawOnImage') {
+      this.newQuestion.backgroundImage = undefined;
     }
   }
 
@@ -233,6 +249,21 @@ export class QuestionEditorComponent implements OnInit {
 
   clearSupportImage(): void {
     this.newQuestion.supportImage = undefined;
+  }
+
+  onBackgroundImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.newQuestion.backgroundImage = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearBackgroundImage(): void {
+    this.newQuestion.backgroundImage = undefined;
   }
 
   private extractErrorMessage(err: any): string {

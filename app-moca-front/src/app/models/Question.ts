@@ -11,6 +11,8 @@ export interface Question {
   status?: boolean;
   /** Imagen de apoyo (Base64), visible en evaluación */
   supportImage?: string;
+  /** Imagen de fondo para dibujar sobre ella (Base64) */
+  backgroundImage?: string;
   test: TestOnlyId;
   category: CategoryOnlyId;
 }

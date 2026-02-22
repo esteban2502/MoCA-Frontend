@@ -468,12 +468,39 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
     this.canvasContext.lineJoin = 'round';
     this.canvasContext.globalCompositeOperation = 'source-over';
     
-    // Set white background
+    // Fondo: blanco y luego imagen de fondo si existe (dibujar sobre una imagen)
     this.canvasContext.fillStyle = '#ffffff';
     this.canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Asegurar que el tool esté configurado correctamente
-    this.setDrawingTool(this.drawingTool);
+    this.drawBackgroundImageOnCanvas(() => this.setDrawingTool(this.drawingTool));
+  }
+
+  /** Dibuja la imagen de fondo en el canvas (ocupa el mayor espacio sin perder proporciones). */
+  private drawBackgroundImageOnCanvas(callback?: () => void): void {
+    if (!this.currentQuestion?.backgroundImage || !this.canvasContext || !this.drawingCanvas) {
+      callback?.();
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      if (!this.canvasContext || !this.drawingCanvas) {
+        callback?.();
+        return;
+      }
+      const canvas = this.drawingCanvas.nativeElement;
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const scale = Math.min(cw / iw, ch / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
+      const dx = (cw - dw) / 2;
+      const dy = (ch - dh) / 2;
+      this.canvasContext.drawImage(img, dx, dy, dw, dh);
+      callback?.();
+    };
+    img.onerror = () => callback?.();
+    img.src = this.currentQuestion.backgroundImage;
   }
 
   startDrawing(event: MouseEvent): void {
@@ -625,10 +652,10 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
 
   clearCanvas(): void {
     if (!this.canvasContext || !this.drawingCanvas) return;
-    
     const canvas = this.drawingCanvas.nativeElement;
     this.canvasContext.fillStyle = '#ffffff';
     this.canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+    this.drawBackgroundImageOnCanvas();
     this.userAnswer = '';
   }
 
