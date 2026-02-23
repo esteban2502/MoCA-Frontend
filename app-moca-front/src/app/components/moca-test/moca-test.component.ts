@@ -63,6 +63,8 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
   private lastY = 0;
   drawingTool: 'pen' | 'eraser' = 'pen';
   private lineWidth = 3;
+  /** Imagen de fondo en memoria para poder redibujarla al limpiar (X) sin perderla. */
+  private backgroundImageDataUrl: string | null = null;
 
   // Patient selection
   selectedPatient: Patient | null = null;
@@ -132,6 +134,7 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
         
         this.totalQuestions = this.questions.length;
         this.currentQuestion = this.questions[0];
+        this.backgroundImageDataUrl = null;
         this.currentQuestionNumber = 1;
         
         // Inicializar respuestas
@@ -176,6 +179,7 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
 
   loadQuestion(): void {
     this.currentQuestion = this.questions[this.currentQuestionIndex];
+    this.backgroundImageDataUrl = null;
     this.currentQuestionNumber = this.currentQuestionIndex + 1;
     
     // Reset warning state
@@ -474,9 +478,39 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
     this.drawBackgroundImageOnCanvas(() => this.setDrawingTool(this.drawingTool));
   }
 
-  /** Dibuja la imagen de fondo en el canvas (ocupa el mayor espacio sin perder proporciones). */
+  /** Dibuja la imagen de fondo en el canvas (ocupa el mayor espacio sin perder proporciones). Guarda la URL en memoria para poder redibujar al limpiar. */
   private drawBackgroundImageOnCanvas(callback?: () => void): void {
     if (!this.currentQuestion?.backgroundImage || !this.canvasContext || !this.drawingCanvas) {
+      callback?.();
+      return;
+    }
+    this.backgroundImageDataUrl = this.currentQuestion.backgroundImage;
+    const img = new Image();
+    img.onload = () => {
+      if (!this.canvasContext || !this.drawingCanvas) {
+        callback?.();
+        return;
+      }
+      const canvas = this.drawingCanvas.nativeElement;
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const scale = Math.min(cw / iw, ch / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
+      const dx = (cw - dw) / 2;
+      const dy = (ch - dh) / 2;
+      this.canvasContext.drawImage(img, dx, dy, dw, dh);
+      callback?.();
+    };
+    img.onerror = () => callback?.();
+    img.src = this.currentQuestion.backgroundImage;
+  }
+
+  /** Redibuja la imagen de fondo guardada en memoria (para usar al pulsar X y mantener el fondo). */
+  private redrawStoredBackgroundImage(callback?: () => void): void {
+    if (!this.backgroundImageDataUrl || !this.canvasContext || !this.drawingCanvas) {
       callback?.();
       return;
     }
@@ -500,7 +534,7 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       callback?.();
     };
     img.onerror = () => callback?.();
-    img.src = this.currentQuestion.backgroundImage;
+    img.src = this.backgroundImageDataUrl;
   }
 
   startDrawing(event: MouseEvent): void {
@@ -653,9 +687,16 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
   clearCanvas(): void {
     if (!this.canvasContext || !this.drawingCanvas) return;
     const canvas = this.drawingCanvas.nativeElement;
+    // Usar siempre modo normal (lápiz) para que el relleno y la imagen se pinten bien,
+    // sin importar si en ese momento está seleccionado el borrador (destination-out).
+    this.canvasContext.globalCompositeOperation = 'source-over';
     this.canvasContext.fillStyle = '#ffffff';
     this.canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-    this.drawBackgroundImageOnCanvas();
+    if (this.backgroundImageDataUrl) {
+      this.redrawStoredBackgroundImage(() => this.setDrawingTool(this.drawingTool));
+    } else {
+      this.drawBackgroundImageOnCanvas(() => this.setDrawingTool(this.drawingTool));
+    }
     this.userAnswer = '';
   }
 
