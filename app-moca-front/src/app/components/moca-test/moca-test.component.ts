@@ -139,6 +139,19 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
         
         // Inicializar respuestas
         this.initializeAnswers();
+
+        // Si la primera pregunta es de dibujo, inicializar el lienzo una vez que la vista esté lista
+        if (this.currentQuestion.isDrawing) {
+          setTimeout(() => {
+            if (this.drawingCanvas && this.currentQuestion?.isDrawing) {
+              this.initializeCanvas();
+              // Si hubiera una respuesta previa guardada (caso futuro), cargarla
+              if (this.userAnswer) {
+                this.loadDrawingFromAnswer();
+              }
+            }
+          }, 300);
+        }
       }
     }).catch(error => {
       console.error('Error cargando datos:', error);
@@ -380,8 +393,7 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
   }
 
   async registerUser(): Promise<void> {
-    if (!this.registrationForm.fullName.trim() || !this.registrationForm.idNumber.trim()) {
-      this.errorMessage = 'Nombre y cédula son requeridos';
+    if (!this.validateRegistrationForm()) {
       return;
     }
 
@@ -397,9 +409,17 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       this.selectedPatient = patient;
       this.showUserForm = false;
       this.loadTestData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error registrando paciente:', error);
-      this.errorMessage = 'Error al registrar paciente. Intente nuevamente.';
+      if (error?.status === 400 || error?.status === 409) {
+        if (typeof error.error === 'string' && error.error.trim().length > 0) {
+          this.errorMessage = error.error;
+        } else {
+          this.errorMessage = 'Error al registrar paciente. Verifique los datos ingresados.';
+        }
+      } else {
+        this.errorMessage = 'Error al registrar paciente. Intente nuevamente.';
+      }
     } finally {
       this.isLoading = false;
     }

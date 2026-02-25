@@ -128,7 +128,17 @@ export class QuestionEditorComponent implements OnInit {
 
   createQuestion(): void {
     this.errorMessage = ''; // Limpiar mensaje de error previo
-    
+
+    // Validación básica en el front: categoría obligatoria
+    if (
+      !this.newQuestion.category ||
+      this.newQuestion.category.id == null ||
+      this.newQuestion.category.id <= 0
+    ) {
+      this.errorMessage = 'Debe elegir una categoría para poder crear la pregunta.';
+      return;
+    }
+
     if (this.mode === 'create') {
       this.newQuestion.test.id = this.testId;
       this.questionService.create(this.newQuestion).subscribe({
@@ -152,6 +162,9 @@ export class QuestionEditorComponent implements OnInit {
         error: (err) => {
           if (err.status === 409) {
             this.errorMessage = err.error || 'Ya existe una pregunta con este orden en el examen';
+          } else if (err.status === 400 && typeof err.error === 'string' && err.error.trim().length > 0) {
+            // Mensajes de validación específicos desde el backend (por ejemplo, categoría requerida)
+            this.errorMessage = err.error;
           } else {
             console.error('Error al crear pregunta:', err);
             this.errorMessage = 'Error al crear la pregunta';
