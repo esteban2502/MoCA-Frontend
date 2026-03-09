@@ -137,6 +137,20 @@
               <div class="col-md-6" *ngIf="selectedPatient.birthDate">
                 <strong>Fecha de Nacimiento:</strong> {{ selectedPatient.birthDate | date:'dd/MM/yyyy' }}
               </div>
+              <div class="col-md-6 mt-2">
+                <strong>Sexo:</strong>
+                <span>
+                  {{
+                    selectedPatient.sex === 'Otro'
+                      ? (selectedPatient.sex + (selectedPatient.sexOtherDescription ? ' (' + selectedPatient.sexOtherDescription + ')' : ''))
+                      : (selectedPatient.sex || 'N/A')
+                  }}
+                </span>
+              </div>
+              <div class="col-md-6 mt-2">
+                <strong>Nivel de Educación:</strong>
+                <span>{{ selectedPatient.educationLevel || 'N/A' }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -278,11 +292,65 @@
                     name="birthDate"
                   >
                 </div>
+                <div class="col-md-6">
+                  <label for="sexEdit" class="form-label fw-semibold">
+                    <i class="bi bi-gender-ambiguous me-1"></i>
+                    Sexo
+                  </label>
+                  <select
+                    id="sexEdit"
+                    class="form-select"
+                    [(ngModel)]="editingPatient.sex"
+                    name="sex"
+                  >
+                    <option [ngValue]="undefined">Sin especificar</option>
+                    <option [ngValue]="'Hombre'">Hombre</option>
+                    <option [ngValue]="'Mujer'">Mujer</option>
+                    <option [ngValue]="'Otro'">Otro</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6" *ngIf="editingPatient.sex === 'Otro'">
+                  <label for="sexOtherEdit" class="form-label fw-semibold">
+                    <i class="bi bi-pencil-square me-1"></i>
+                    Especifique sexo (máx 35 caracteres)
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="sexOtherEdit"
+                    [(ngModel)]="editingPatient.sexOtherDescription"
+                    name="sexOtherDescription"
+                    maxlength="35"
+                    placeholder="Describa el sexo"
+                  >
+                </div>
+                <div class="col-md-6">
+                  <label for="educationLevelEdit" class="form-label fw-semibold">
+                    <i class="bi bi-mortarboard me-1"></i>
+                    Nivel de Educación
+                  </label>
+                  <select
+                    id="educationLevelEdit"
+                    class="form-select"
+                    [(ngModel)]="editingPatient.educationLevel"
+                    name="educationLevel"
+                  >
+                    <option [ngValue]="undefined">Sin especificar</option>
+                    <option [ngValue]="'Educación Inicial'">Educación Inicial</option>
+                    <option [ngValue]="'Educación Preescolar'">Educación Preescolar</option>
+                    <option [ngValue]="'Educación Basica (Primaria y Secundaria)'">Educación Basica (Primaria y Secundaria)</option>
+                    <option [ngValue]="'Educación Media (Bachillerato)'">Educación Media (Bachillerato)</option>
+                    <option [ngValue]="'Educación superior'">Educación superior</option>
+                  </select>
+                </div>
               </div>
 
               <div class="alert alert-info" role="alert">
                 <i class="bi bi-info-circle me-2"></i>
-                <strong>Nota:</strong> Solo se pueden editar el nombre completo y la fecha de nacimiento. La cédula no se puede modificar por razones de seguridad.
+                <strong>Nota:</strong> Solo se pueden editar el nombre completo, la fecha de nacimiento y los datos complementarios. La cédula no se puede modificar por razones de seguridad.
               </div>
             </form>
           </div>

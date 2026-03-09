@@ -94,6 +94,51 @@
         </div>
       </div>
 
+      <div class="form-row">
+        <div class="form-group">
+          <label for="sex">Sexo *</label>
+          <select
+            id="sex"
+            [(ngModel)]="registrationForm.sex"
+            name="sex"
+            required
+          >
+            <option [ngValue]="''" disabled>Seleccione sexo</option>
+            <option [ngValue]="'Hombre'">Hombre</option>
+            <option [ngValue]="'Mujer'">Mujer</option>
+            <option [ngValue]="'Otro'">Otro</option>
+          </select>
+        </div>
+        <div class="form-group" *ngIf="registrationForm.sex === 'Otro'">
+          <label for="sexOther">Especifique sexo (máx 35 caracteres) *</label>
+          <input
+            type="text"
+            id="sexOther"
+            [(ngModel)]="registrationForm.sexOtherDescription"
+            name="sexOtherDescription"
+            maxlength="35"
+            placeholder="Describa el sexo"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="educationLevel">Nivel de Educación *</label>
+        <select
+          id="educationLevel"
+          [(ngModel)]="registrationForm.educationLevel"
+          name="educationLevel"
+          required
+        >
+          <option [ngValue]="''" disabled>Seleccione nivel de educación</option>
+          <option [ngValue]="'Educación Inicial'">Educación Inicial</option>
+          <option [ngValue]="'Educación Preescolar'">Educación Preescolar</option>
+          <option [ngValue]="'Educación Basica (Primaria y Secundaria)'">Educación Basica (Primaria y Secundaria)</option>
+          <option [ngValue]="'Educación Media (Bachillerato)'">Educación Media (Bachillerato)</option>
+          <option [ngValue]="'Educación superior'">Educación superior</option>
+        </select>
+      </div>
+
       <button type="submit" class="btn-primary" [disabled]="isLoading">
         <i class="bi bi-person-plus" *ngIf="!isLoading"></i>
         <div class="spinner-small" *ngIf="isLoading"></div>
@@ -238,6 +283,40 @@
                 (touchmove)="drawTouch($event)"
                 (touchend)="stopDrawing()"
               ></canvas>
+            </div>
+          </div>
+
+          <!-- Dynamic Table Area (if question has dynamic table config) -->
+          <div *ngIf="currentQuestion.dynamicTableConfig" class="dynamic-table-area mt-3">
+            <h3 class="dynamic-table-title">
+              <i class="bi bi-grid-3x3-gap"></i>
+              Tabla dinámica
+            </h3>
+            <div class="dynamic-table-scroll">
+              <table class="table table-bordered dynamic-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th *ngFor="let col of dynamicTableColumns; let c = index">
+                      {{ col || ('Columna ' + (c + 1)) }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of dynamicTableRows; let r = index">
+                    <th>
+                      {{ row || ('Fila ' + (r + 1)) }}
+                    </th>
+                    <td *ngFor="let col of dynamicTableColumns; let c = index" class="text-center">
+                      <input
+                        type="checkbox"
+                        [checked]="dynamicTableSelection[ r + '-' + c ]"
+                        (change)="onDynamicTableCheckboxChange(r, c, $event)"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 

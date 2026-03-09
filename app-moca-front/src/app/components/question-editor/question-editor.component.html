@@ -65,7 +65,9 @@
             <td>{{ q.question }}</td>
             <td class="text-wraper">{{ q.description }}</td>
             <td class="text-wraper">{{ q.questionOrder}}</td>
-            <td class="text-wraper">{{ q.maxScore || 'N/A' }}</td>
+            <td class="text-wraper">
+              {{ q.maxScore !== null && q.maxScore !== undefined ? q.maxScore : 'N/A' }}
+            </td>
             <td class="text-wraper">{{ q.category.name }}</td>
           </tr>
         </tbody>
@@ -143,7 +145,7 @@
               class="form-control"
               [(ngModel)]="newQuestion.maxScore"
               type="number"
-              min="1"
+              min="0"
               placeholder="Ingrese el puntaje máximo de la pregunta"
             />
           </div>
@@ -241,6 +243,67 @@
             <div class="mt-2 d-flex align-items-center gap-2" *ngIf="newQuestion.backgroundImage">
               <img [src]="newQuestion.backgroundImage" alt="Vista previa fondo" class="img-thumbnail" style="max-height: 100px;" />
               <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearBackgroundImage(); backgroundInput.value = ''">Quitar imagen</button>
+            </div>
+          </div>
+
+          <!-- Tabla dinámica de chequeo -->
+          <div class="col-12 mb-3">
+            <label class="form-label fw-semibold">Tabla dinámica (matriz de checkboxes)</label>
+            <small class="d-block text-muted mb-2">
+              Configure columnas y filas. Durante la evaluación, cada celda será un checkbox seleccionable.
+            </small>
+            <div class="d-flex gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-outline-success" (click)="addDynamicColumn()">
+                <i class="bi bi-plus"></i> Columna
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-success" (click)="addDynamicRow()">
+                <i class="bi bi-plus"></i> Fila
+              </button>
+            </div>
+            <div class="dynamic-table-editor-scroll">
+              <table class="table table-bordered dynamic-table-editor" *ngIf="dynamicTableColumns.length || dynamicTableRows.length">
+                <thead>
+                  <tr>
+                    <th style="min-width: 120px;">Filas / Columnas</th>
+                    <th *ngFor="let col of dynamicTableColumns; let c = index; trackBy: trackByIndex">
+                      <div class="d-flex align-items-center gap-1">
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          [(ngModel)]="dynamicTableColumns[c]"
+                          placeholder="Columna {{ c + 1 }}"
+                        />
+                        <button type="button" class="btn btn-sm btn-outline-danger btn-circle" (click)="removeDynamicColumn(c)">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of dynamicTableRows; let r = index; trackBy: trackByIndex">
+                    <th>
+                      <div class="d-flex align-items-center gap-1">
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          [(ngModel)]="dynamicTableRows[r]"
+                          placeholder="Fila {{ r + 1 }}"
+                        />
+                        <button type="button" class="btn btn-sm btn-outline-danger btn-circle" (click)="removeDynamicRow(r)">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                    </th>
+                    <td *ngFor="let col of dynamicTableColumns; let c = index; trackBy: trackByIndex" class="text-center align-middle">
+                      <input type="checkbox" disabled />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div *ngIf="!dynamicTableColumns.length && !dynamicTableRows.length" class="text-muted small">
+                No hay filas ni columnas configuradas. Use los botones de arriba para agregar.
+              </div>
             </div>
           </div>
         </div>

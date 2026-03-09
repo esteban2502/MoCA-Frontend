@@ -40,3 +40,25 @@
     vertical-align: middle;
   }
 }
+
+/* Editor de tabla dinámica en el modal de pregunta */
+.dynamic-table-editor-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.dynamic-table-editor {
+  margin-bottom: 0;
+  min-width: 420px;
+}
+
+.dynamic-table-editor th,
+.dynamic-table-editor td {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.dynamic-table-editor th {
+  background-color: rgba(0, 128, 78, 0.04);
+}

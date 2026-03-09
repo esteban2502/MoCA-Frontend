@@ -19,6 +19,7 @@ interface LocalAnswer {
   userAnswer: string;
   score: number | null;
   notes: string;
+  dynamicTableResponse?: string;
 }
 
 @Component({
@@ -66,6 +67,11 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
   /** Imagen de fondo en memoria para poder redibujarla al limpiar (X) sin perderla. */
   private backgroundImageDataUrl: string | null = null;
 
+  // Tabla dinámica (configuración y selección actual)
+  dynamicTableColumns: string[] = [];
+  dynamicTableRows: string[] = [];
+  dynamicTableSelection: { [key: string]: boolean } = {};
+
   // Patient selection
   selectedPatient: Patient | null = null;
 
@@ -77,7 +83,10 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
   registrationForm = {
     fullName: '',
     idNumber: '',
-    birthDate: ''
+    birthDate: '',
+    sex: '',
+    educationLevel: '',
+    sexOtherDescription: ''
   };
   
   // Login form (documentNumber)
@@ -140,6 +149,9 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
         // Inicializar respuestas
         this.initializeAnswers();
 
+        // Inicializar tabla dinámica (si la primera pregunta la tiene)
+        this.initializeDynamicTableState(null);
+
         // Si la primera pregunta es de dibujo, inicializar el lienzo una vez que la vista esté lista
         if (this.currentQuestion.isDrawing) {
           setTimeout(() => {
@@ -166,7 +178,8 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       questionId: q.id!,
       userAnswer: '',
       score: null,
-      notes: ''
+      notes: '',
+      dynamicTableResponse: ''
     }));
   }
 
@@ -204,10 +217,12 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       this.userAnswer = savedAnswer.userAnswer;
       this.evaluationScore = savedAnswer.score;
       this.evaluationNotes = savedAnswer.notes;
+      this.initializeDynamicTableState(savedAnswer.dynamicTableResponse || null);
     } else {
       this.userAnswer = '';
       this.evaluationScore = null;
       this.evaluationNotes = '';
+      this.initializeDynamicTableState(null);
     }
     
     // Initialize canvas for drawing questions
@@ -241,10 +256,52 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       this.answers[answerIndex] = {
         questionId: this.currentQuestion.id!,
         userAnswer: this.userAnswer,
+        dynamicTableResponse: this.currentQuestion.dynamicTableConfig
+          ? JSON.stringify(this.dynamicTableSelection)
+          : '',
         score: this.evaluationScore,
         notes: this.evaluationNotes
       };
     }
+  }
+
+  /** Inicializa columnas/filas y selección de tabla dinámica para la pregunta actual. */
+  private initializeDynamicTableState(savedResponseJson: string | null): void {
+    this.dynamicTableColumns = [];
+    this.dynamicTableRows = [];
+    this.dynamicTableSelection = {};
+
+    if (!this.currentQuestion?.dynamicTableConfig) {
+      return;
+    }
+
+    try {
+      const config = JSON.parse(this.currentQuestion.dynamicTableConfig);
+      this.dynamicTableColumns = Array.isArray(config.columns) ? config.columns.slice() : [];
+      this.dynamicTableRows = Array.isArray(config.rows) ? config.rows.slice() : [];
+    } catch (e) {
+      console.error('Error parseando dynamicTableConfig:', e);
+      this.dynamicTableColumns = [];
+      this.dynamicTableRows = [];
+    }
+
+    if (savedResponseJson) {
+      try {
+        const parsed = JSON.parse(savedResponseJson);
+        if (parsed && typeof parsed === 'object') {
+          this.dynamicTableSelection = parsed;
+        }
+      } catch (e) {
+        console.error('Error parseando dynamicTableResponse:', e);
+        this.dynamicTableSelection = {};
+      }
+    }
+  }
+
+  onDynamicTableCheckboxChange(rowIndex: number, colIndex: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const key = `${rowIndex}-${colIndex}`;
+    this.dynamicTableSelection[key] = input.checked;
   }
 
   submitAnswer(): void {
@@ -279,6 +336,7 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
         answers: this.answers.map(localAnswer => ({
           questionId: localAnswer.questionId,
           userAnswer: localAnswer.userAnswer,
+          dynamicTableResponse: localAnswer.dynamicTableResponse ?? '',
           score: localAnswer.score,
           notes: localAnswer.notes
         })),
@@ -317,7 +375,8 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
 
   // Getters para el template
   get maxScore(): number {
-    return this.currentQuestion?.maxScore || 10;
+    const ms = this.currentQuestion?.maxScore;
+    return ms ?? 10;
   }
 
   // Manejar input en tiempo real
@@ -363,7 +422,10 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
     this.registrationForm = {
       fullName: '',
       idNumber: '',
-      birthDate: ''
+      birthDate: '',
+      sex: '',
+      educationLevel: '',
+      sexOtherDescription: ''
     };
     this.loginForm = {
       idNumber: ''
@@ -404,7 +466,12 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       const patient = await firstValueFrom(this.patientService.create({
         fullName: this.registrationForm.fullName,
         documentNumber: this.registrationForm.idNumber,
-        birthDate: this.registrationForm.birthDate
+        birthDate: this.registrationForm.birthDate,
+        sex: this.registrationForm.sex,
+        educationLevel: this.registrationForm.educationLevel,
+        sexOtherDescription: this.registrationForm.sex === 'Otro'
+          ? (this.registrationForm.sexOtherDescription || '').trim()
+          : undefined
       }));
       this.selectedPatient = patient;
       this.showUserForm = false;
@@ -437,6 +504,25 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
     if (!this.registrationForm.birthDate) {
       this.errorMessage = 'La fecha de nacimiento es requerida';
       return false;
+    }
+    if (!this.registrationForm.sex) {
+      this.errorMessage = 'El sexo es requerido';
+      return false;
+    }
+    if (!this.registrationForm.educationLevel) {
+      this.errorMessage = 'El nivel de educación es requerido';
+      return false;
+    }
+    if (this.registrationForm.sex === 'Otro') {
+      const other = (this.registrationForm.sexOtherDescription || '').trim();
+      if (!other) {
+        this.errorMessage = 'Debe especificar el sexo en la opción "Otro".';
+        return false;
+      }
+      if (other.length > 35) {
+        this.errorMessage = 'La descripción de "Otro" no puede superar los 35 caracteres.';
+        return false;
+      }
     }
     return true;
   }

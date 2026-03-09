@@ -369,6 +369,44 @@
   text-align: left;
 }
 
+/* Dynamic table for questions */
+.dynamic-table-area {
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.dynamic-table-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #344767;
+}
+
+.dynamic-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.dynamic-table {
+  margin-bottom: 0;
+  min-width: 400px;
+}
+
+.dynamic-table th,
+.dynamic-table td {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.dynamic-table th {
+  background-color: rgba(0, 128, 78, 0.05);
+  font-weight: 600;
+}
+
 .support-image-panel {
   flex: 0 1 1080px;
   display: flex;
@@ -427,6 +465,7 @@
   padding: 15px;
   border-radius: 12px;
   border-left: 4px solid var(--green);
+  white-space: pre-line;
 }
 
 /* Answer Area */

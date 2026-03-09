@@ -13,6 +13,8 @@ export interface Question {
   supportImage?: string;
   /** Imagen de fondo para dibujar sobre ella (Base64) */
   backgroundImage?: string;
+  /** Configuración de tabla dinámica (JSON con columnas y filas) */
+  dynamicTableConfig?: string;
   test: TestOnlyId;
   category: CategoryOnlyId;
 }

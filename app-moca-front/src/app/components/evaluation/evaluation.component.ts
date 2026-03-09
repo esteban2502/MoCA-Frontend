@@ -8,6 +8,7 @@ import { TestService } from '../../services/test.service';
 import { ResultService } from '../../services/result.service';
 import { Test } from '../../models/Test';
 import { Result } from '../../models/Result';
+import { Answer } from '../../models/Answer';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { NgxPaginationModule } from 'ngx-pagination';
 
@@ -102,13 +103,13 @@ export class EvaluationComponent implements OnInit {
   }
 
   viewResult(content: any, result: Result) {
-    console.log('Resultado seleccionado:', result);
-    console.log('Answers del resultado:', result.answers);
+    // Construir la vista de tabla dinámica para cada respuesta (si aplica)
     if (result.answers && result.answers.length > 0) {
-      console.log('Primera respuesta:', result.answers[0]);
-      console.log('Question de la primera respuesta:', result.answers[0].question);
+      result.answers.forEach((ans: Answer) => {
+        ans.dynamicTableView = this.buildDynamicTableView(ans);
+      });
     }
-    
+
     this.selectedResult = result;
     this.modal
       .open(content, { size: 'lg', ariaLabelledBy: 'modal-basic-title' })
@@ -122,6 +123,42 @@ export class EvaluationComponent implements OnInit {
           this.selectedResult = null;
         }
       );
+  }
+
+  /** Construye un objeto de vista para la tabla dinámica (columnas, filas y celdas marcadas). */
+  private buildDynamicTableView(answer: Answer): { columns: string[]; rows: string[]; selection: { [key: string]: boolean } } | null {
+    const question = answer.question;
+    if (!question || !question.dynamicTableConfig) {
+      return null;
+    }
+
+    let columns: string[] = [];
+    let rows: string[] = [];
+    try {
+      const cfg = JSON.parse(question.dynamicTableConfig);
+      columns = Array.isArray(cfg.columns) ? cfg.columns.slice() : [];
+      rows = Array.isArray(cfg.rows) ? cfg.rows.slice() : [];
+    } catch (e) {
+      console.error('Error parseando dynamicTableConfig en evaluación:', e);
+      return null;
+    }
+
+    const selection: { [key: string]: boolean } = {};
+    if (answer.dynamicTableResponse) {
+      try {
+        const parsed = JSON.parse(answer.dynamicTableResponse);
+        if (parsed && typeof parsed === 'object') {
+          for (const key of Object.keys(parsed)) {
+            const v = parsed[key];
+            selection[key] = v === true || v === 'true' || v === 1;
+          }
+        }
+      } catch (e) {
+        console.error('Error parseando dynamicTableResponse en evaluación:', e);
+      }
+    }
+
+    return { columns, rows, selection };
   }
 
   deleteResult(resultId: number) {

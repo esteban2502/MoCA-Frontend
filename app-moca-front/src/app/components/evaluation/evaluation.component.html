@@ -226,7 +226,7 @@
             <div class="card-body" [class.row]="answer.question && answer.question.supportImage" [class.g-3]="answer.question && answer.question.supportImage">
               <div [class.col-md-7]="answer.question && answer.question.supportImage">
                 <!-- Descripción de la pregunta -->
-                <p class="text-muted mb-3" *ngIf="answer.question && answer.question.description">
+                <p class="text-muted mb-3 result-description" *ngIf="answer.question && answer.question.description">
                   <i class="bi bi-info-circle me-1"></i>
                   {{ answer.question.description }}
                 </p>
@@ -247,6 +247,40 @@
                   </div>
                 </div>
 
+                <!-- Tabla dinámica respondida (si la pregunta tiene configuración de tabla) -->
+                <div *ngIf="answer.dynamicTableView as dt" class="dynamic-table-area mb-3">
+                  <label class="form-label fw-semibold text-success">
+                    <i class="bi bi-grid-3x3-gap me-1"></i>
+                    Respuesta en tabla
+                  </label>
+                  <div class="dynamic-table-scroll">
+                    <table class="table table-bordered dynamic-table">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th *ngFor="let col of dt.columns; let c = index">
+                            {{ col || ('Columna ' + (c + 1)) }}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let row of dt.rows; let r = index">
+                          <th>
+                            {{ row || ('Fila ' + (r + 1)) }}
+                          </th>
+                          <td *ngFor="let col of dt.columns; let c = index" class="text-center">
+                            <input
+                              type="checkbox"
+                              disabled
+                              [checked]="!!dt.selection[r + '-' + c]"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
                 <!-- Puntaje obtenido -->
                 <div class="row mb-3">
                   <div class="col-md-6">
@@ -260,7 +294,10 @@
                       </span>
                     </div>
                   </div>
-                  <div class="col-md-6" *ngIf="answer.question && answer.question.maxScore">
+                  <div
+                    class="col-md-6"
+                    *ngIf="answer.question && answer.question.maxScore !== null && answer.question.maxScore !== undefined"
+                  >
                     <label class="form-label fw-semibold text-muted">
                       <i class="bi bi-trophy me-1"></i>
                       Puntaje Máximo:
@@ -291,8 +328,7 @@
                 <img 
                   [src]="answer.question.supportImage" 
                   alt="Imagen de apoyo"
-                  class="img-fluid rounded border"
-                  style="max-width: 100%; height: 550px; object-fit: contain;"
+                  class="img-fluid rounded border support-image-eval"
                 />
               </div>
             </div>

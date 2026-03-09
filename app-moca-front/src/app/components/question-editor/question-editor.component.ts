@@ -44,6 +44,15 @@ export class QuestionEditorComponent implements OnInit {
   questionOption: 'none' | 'drawing' | 'supportImage' | 'drawOnImage' = 'none';
   @ViewChild('errorAlertModal') errorAlertModal!: TemplateRef<any>;
 
+  // Configuración de tabla dinámica
+  dynamicTableColumns: string[] = [];
+  dynamicTableRows: string[] = [];
+
+  /** trackBy por índice para que los inputs de encabezados no pierdan foco al escribir */
+  trackByIndex(index: number): number {
+    return index;
+  }
+
   constructor(
     private modal: NgbModal,
     private route: ActivatedRoute,
@@ -85,6 +94,9 @@ export class QuestionEditorComponent implements OnInit {
         this.questionOption = 'none';
       }
       this.mode = 'edit';
+
+      // Cargar configuración de tabla dinámica si existe
+      this.loadDynamicTableConfigFromQuestion();
     } else {
       this.mode = 'create';
       this.idAux = 0;
@@ -99,8 +111,11 @@ export class QuestionEditorComponent implements OnInit {
         test: { id: this.testId },
         category: { id: 0 },
         supportImage: undefined,
-        backgroundImage: undefined
+        backgroundImage: undefined,
+        dynamicTableConfig: undefined
       };
+      this.dynamicTableColumns = [];
+      this.dynamicTableRows = [];
     }
 
     this.modal
@@ -141,6 +156,8 @@ export class QuestionEditorComponent implements OnInit {
 
     if (this.mode === 'create') {
       this.newQuestion.test.id = this.testId;
+      // Sincronizar configuración de tabla dinámica antes de enviar
+      this.updateDynamicTableConfigOnQuestion();
       this.questionService.create(this.newQuestion).subscribe({
         next: () => {
           this.getAllQuestions();
@@ -154,7 +171,8 @@ export class QuestionEditorComponent implements OnInit {
             test: { id: this.testId },
             category: { id: 0 },
             supportImage: undefined,
-            backgroundImage: undefined
+            backgroundImage: undefined,
+            dynamicTableConfig: undefined
           };
           this.questionOption = 'none';
           this.modal.dismissAll();
@@ -172,6 +190,8 @@ export class QuestionEditorComponent implements OnInit {
         },
       });
     } else if (this.mode === 'edit' && this.idAux) {
+      // Sincronizar configuración de tabla dinámica antes de actualizar
+      this.updateDynamicTableConfigOnQuestion();
       this.questionService.update(this.idAux, this.newQuestion).subscribe({
         next: () => {
           this.getAllQuestions();
@@ -185,7 +205,8 @@ export class QuestionEditorComponent implements OnInit {
             test: { id: this.testId },
             category: { id: 0 },
             supportImage: undefined,
-            backgroundImage: undefined
+            backgroundImage: undefined,
+            dynamicTableConfig: undefined
           };
           this.questionOption = 'none';
           this.idAux = 0;
@@ -247,6 +268,56 @@ export class QuestionEditorComponent implements OnInit {
     if (opt !== 'drawOnImage') {
       this.newQuestion.backgroundImage = undefined;
     }
+  }
+
+  // Tabla dinámica: helpers para cargar y guardar configuración
+  private loadDynamicTableConfigFromQuestion(): void {
+    this.dynamicTableColumns = [];
+    this.dynamicTableRows = [];
+    if (!this.newQuestion.dynamicTableConfig) {
+      return;
+    }
+    try {
+      const cfg = JSON.parse(this.newQuestion.dynamicTableConfig);
+      this.dynamicTableColumns = Array.isArray(cfg.columns) ? cfg.columns.slice() : [];
+      this.dynamicTableRows = Array.isArray(cfg.rows) ? cfg.rows.slice() : [];
+    } catch (e) {
+      console.error('Error parseando dynamicTableConfig en editor:', e);
+      this.dynamicTableColumns = [];
+      this.dynamicTableRows = [];
+    }
+  }
+
+  updateDynamicTableConfigOnQuestion(): void {
+    if (this.dynamicTableColumns.length === 0 && this.dynamicTableRows.length === 0) {
+      this.newQuestion.dynamicTableConfig = undefined;
+      return;
+    }
+    const cfg = {
+      columns: this.dynamicTableColumns,
+      rows: this.dynamicTableRows,
+    };
+    this.newQuestion.dynamicTableConfig = JSON.stringify(cfg);
+  }
+
+  addDynamicColumn(): void {
+    this.dynamicTableColumns.push(`Columna ${this.dynamicTableColumns.length + 1}`);
+    this.updateDynamicTableConfigOnQuestion();
+  }
+
+  removeDynamicColumn(index: number): void {
+    this.dynamicTableColumns.splice(index, 1);
+    this.updateDynamicTableConfigOnQuestion();
+  }
+
+  addDynamicRow(): void {
+    this.dynamicTableRows.push(`Fila ${this.dynamicTableRows.length + 1}`);
+    this.updateDynamicTableConfigOnQuestion();
+  }
+
+  removeDynamicRow(index: number): void {
+    this.dynamicTableRows.splice(index, 1);
+    this.updateDynamicTableConfigOnQuestion();
   }
 
   onSupportImageSelected(event: Event): void {
