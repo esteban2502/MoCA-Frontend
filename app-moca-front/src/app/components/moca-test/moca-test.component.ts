@@ -220,9 +220,20 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       this.initializeDynamicTableState(savedAnswer.dynamicTableResponse || null);
     } else {
       this.userAnswer = '';
-      this.evaluationScore = null;
       this.evaluationNotes = '';
       this.initializeDynamicTableState(null);
+      // En preguntas con tabla dinámica, puntaje inicial = número de checks, respetando máximo (0 = no sumar)
+      if (this.currentQuestion.dynamicTableConfig) {
+        const max = this.maxScore;
+        if (max === 0) {
+          this.evaluationScore = 0;
+        } else {
+          const count = Object.values(this.dynamicTableSelection).filter(v => v === true).length;
+          this.evaluationScore = Math.min(count, max);
+        }
+      } else {
+        this.evaluationScore = null;
+      }
     }
     
     // Initialize canvas for drawing questions
@@ -302,6 +313,15 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
     const input = event.target as HTMLInputElement;
     const key = `${rowIndex}-${colIndex}`;
     this.dynamicTableSelection[key] = input.checked;
+    const max = this.maxScore;
+    // Si puntaje máximo es 0, los checkboxes no suman puntos
+    if (max === 0) {
+      this.evaluationScore = 0;
+      return;
+    }
+    // 1 checkbox = 1 punto, sin superar el máximo de la pregunta
+    const checkedCount = Object.values(this.dynamicTableSelection).filter(v => v === true).length;
+    this.evaluationScore = Math.min(checkedCount, max);
   }
 
   submitAnswer(): void {

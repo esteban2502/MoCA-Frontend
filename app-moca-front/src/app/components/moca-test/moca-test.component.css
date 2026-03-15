@@ -407,6 +407,16 @@
   font-weight: 600;
 }
 
+/* Checkboxes de tabla dinámica ~65% más grandes para mejor clic */
+.dynamic-table-checkbox {
+  width: 1.65rem;
+  height: 1.65rem;
+  min-width: 1.65rem;
+  min-height: 1.65rem;
+  cursor: pointer;
+  accent-color: var(--green, #00804e);
+}
+
 .support-image-panel {
   flex: 0 1 1080px;
   display: flex;

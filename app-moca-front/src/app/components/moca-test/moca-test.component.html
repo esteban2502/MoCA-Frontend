@@ -310,6 +310,7 @@
                     <td *ngFor="let col of dynamicTableColumns; let c = index" class="text-center">
                       <input
                         type="checkbox"
+                        class="dynamic-table-checkbox"
                         [checked]="dynamicTableSelection[ r + '-' + c ]"
                         (change)="onDynamicTableCheckboxChange(r, c, $event)"
                       />

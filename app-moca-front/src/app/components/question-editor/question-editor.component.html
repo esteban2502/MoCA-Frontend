@@ -337,7 +337,7 @@
                     <tr *ngFor="let row of dynamicTableRows; let r = index; trackBy: trackByIndex">
                       <th class="dynamic-table-preview-row-label">{{ row || ('Fila ' + (r + 1)) }}</th>
                       <td *ngFor="let col of dynamicTableColumns; let c = index; trackBy: trackByIndex" class="text-center">
-                        <input type="checkbox" disabled class="form-check-input" />
+                        <input type="checkbox" disabled class="form-check-input dynamic-table-checkbox" />
                       </td>
                     </tr>
                   </tbody>

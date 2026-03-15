@@ -271,6 +271,7 @@
                           <td *ngFor="let col of dt.columns; let c = index" class="text-center">
                             <input
                               type="checkbox"
+                              class="dynamic-table-checkbox"
                               disabled
                               [checked]="!!dt.selection[r + '-' + c]"
                             />

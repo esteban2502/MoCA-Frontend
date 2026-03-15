@@ -298,6 +298,15 @@
   font-weight: 600;
 }
 
+/* Checkboxes de tabla dinámica ~65% más grandes (vista resultados) */
+.dynamic-table-checkbox {
+  width: 1.65rem;
+  height: 1.65rem;
+  min-width: 1.65rem;
+  min-height: 1.65rem;
+  accent-color: var(--green, #00804e);
+}
+
 .question-item .card {
   transition: all 0.3s ease;
 }

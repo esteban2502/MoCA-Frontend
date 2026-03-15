@@ -130,3 +130,12 @@
   text-align: center;
   vertical-align: middle;
 }
+
+/* Checkboxes de vista previa de tabla dinámica ~65% más grandes */
+.dynamic-table-checkbox {
+  width: 1.65rem;
+  height: 1.65rem;
+  min-width: 1.65rem;
+  min-height: 1.65rem;
+  accent-color: #00804e;
+}
