@@ -246,63 +246,102 @@
             </div>
           </div>
 
-          <!-- Tabla dinámica de chequeo -->
-          <div class="col-12 mb-3">
+          <!-- Tabla dinámica: grupos de columnas, filas y vista previa -->
+          <div class="col-12 mb-3 dynamic-table-editor-block">
             <label class="form-label fw-semibold">Tabla dinámica (matriz de checkboxes)</label>
             <small class="d-block text-muted mb-2">
-              Configure columnas y filas. Durante la evaluación, cada celda será un checkbox seleccionable.
+              Agregue columnas y filas; asigne un nombre a cada una. Durante la evaluación, cada celda será un checkbox seleccionable.
             </small>
-            <div class="d-flex gap-2 mb-2">
+            <div class="d-flex gap-2 mb-3">
               <button type="button" class="btn btn-sm btn-outline-success" (click)="addDynamicColumn()">
-                <i class="bi bi-plus"></i> Columna
+                <i class="bi bi-plus"></i> Agregar columna
               </button>
               <button type="button" class="btn btn-sm btn-outline-success" (click)="addDynamicRow()">
-                <i class="bi bi-plus"></i> Fila
+                <i class="bi bi-plus"></i> Agregar fila
               </button>
             </div>
-            <div class="dynamic-table-editor-scroll">
-              <table class="table table-bordered dynamic-table-editor" *ngIf="dynamicTableColumns.length || dynamicTableRows.length">
-                <thead>
-                  <tr>
-                    <th style="min-width: 120px;">Filas / Columnas</th>
-                    <th *ngFor="let col of dynamicTableColumns; let c = index; trackBy: trackByIndex">
-                      <div class="d-flex align-items-center gap-1">
-                        <input
-                          type="text"
-                          class="form-control form-control-sm"
-                          [(ngModel)]="dynamicTableColumns[c]"
-                          placeholder="Columna {{ c + 1 }}"
-                        />
-                        <button type="button" class="btn btn-sm btn-outline-danger btn-circle" (click)="removeDynamicColumn(c)">
-                          <i class="bi bi-x"></i>
-                        </button>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let row of dynamicTableRows; let r = index; trackBy: trackByIndex">
-                    <th>
-                      <div class="d-flex align-items-center gap-1">
-                        <input
-                          type="text"
-                          class="form-control form-control-sm"
-                          [(ngModel)]="dynamicTableRows[r]"
-                          placeholder="Fila {{ r + 1 }}"
-                        />
-                        <button type="button" class="btn btn-sm btn-outline-danger btn-circle" (click)="removeDynamicRow(r)">
-                          <i class="bi bi-x"></i>
-                        </button>
-                      </div>
-                    </th>
-                    <td *ngFor="let col of dynamicTableColumns; let c = index; trackBy: trackByIndex" class="text-center align-middle">
-                      <input type="checkbox" disabled />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <div *ngIf="!dynamicTableColumns.length && !dynamicTableRows.length" class="text-muted small">
-                No hay filas ni columnas configuradas. Use los botones de arriba para agregar.
+
+            <!-- Grupo: Nombres de columnas -->
+            <div class="dynamic-table-group mb-3">
+              <div class="dynamic-table-group-title">
+                <i class="bi bi-columns-gap me-1"></i>
+                Columnas
+              </div>
+              <div class="dynamic-table-input-list" *ngIf="dynamicTableColumns.length; else noColumns">
+                <div class="dynamic-table-input-item" *ngFor="let col of dynamicTableColumns; let c = index; trackBy: trackByIndex">
+                  <label class="dynamic-table-input-label">Columna {{ c + 1 }}</label>
+                  <div class="d-flex align-items-center gap-1">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="dynamicTableColumns[c]"
+                      [name]="'col-' + c"
+                      placeholder="Nombre de la columna"
+                    />
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-circle" (click)="removeDynamicColumn(c)" title="Quitar columna">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noColumns>
+                <p class="text-muted small mb-0">Aún no hay columnas. Use "Agregar columna".</p>
+              </ng-template>
+            </div>
+
+            <!-- Grupo: Nombres de filas -->
+            <div class="dynamic-table-group mb-3">
+              <div class="dynamic-table-group-title">
+                <i class="bi bi-list-ul me-1"></i>
+                Filas
+              </div>
+              <div class="dynamic-table-input-list" *ngIf="dynamicTableRows.length; else noRows">
+                <div class="dynamic-table-input-item" *ngFor="let row of dynamicTableRows; let r = index; trackBy: trackByIndex">
+                  <label class="dynamic-table-input-label">Fila {{ r + 1 }}</label>
+                  <div class="d-flex align-items-center gap-1">
+                    <input
+                      type="text"
+                      class="form-control form-control-sm"
+                      [(ngModel)]="dynamicTableRows[r]"
+                      [name]="'row-' + r"
+                      placeholder="Nombre de la fila"
+                    />
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-circle" (click)="removeDynamicRow(r)" title="Quitar fila">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noRows>
+                <p class="text-muted small mb-0">Aún no hay filas. Use "Agregar fila".</p>
+              </ng-template>
+            </div>
+
+            <!-- Vista previa de la tabla -->
+            <div class="dynamic-table-group" *ngIf="dynamicTableColumns.length || dynamicTableRows.length">
+              <div class="dynamic-table-group-title">
+                <i class="bi bi-grid-3x3-gap me-1"></i>
+                Vista previa
+              </div>
+              <div class="dynamic-table-preview-wrap">
+                <table class="table table-bordered table-sm dynamic-table-preview">
+                  <thead>
+                    <tr>
+                      <th class="dynamic-table-preview-corner"></th>
+                      <th *ngFor="let col of dynamicTableColumns; let c = index; trackBy: trackByIndex" class="dynamic-table-preview-header">
+                        {{ col || ('Columna ' + (c + 1)) }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let row of dynamicTableRows; let r = index; trackBy: trackByIndex">
+                      <th class="dynamic-table-preview-row-label">{{ row || ('Fila ' + (r + 1)) }}</th>
+                      <td *ngFor="let col of dynamicTableColumns; let c = index; trackBy: trackByIndex" class="text-center">
+                        <input type="checkbox" disabled class="form-check-input" />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

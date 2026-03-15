@@ -103,14 +103,30 @@ export class EvaluationComponent implements OnInit {
   }
 
   viewResult(content: any, result: Result) {
-    // Construir la vista de tabla dinámica para cada respuesta (si aplica)
-    if (result.answers && result.answers.length > 0) {
-      result.answers.forEach((ans: Answer) => {
-        ans.dynamicTableView = this.buildDynamicTableView(ans);
-      });
-    }
+    // Ordenar las respuestas según el orden de la pregunta en la prueba
+    const sortedAnswers: Answer[] = (result.answers || []).slice().sort((a, b) => {
+      const qa = a.question;
+      const qb = b.question;
+      const orderA = qa?.questionOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = qb?.questionOrder ?? Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      const idA = qa?.id ?? 0;
+      const idB = qb?.id ?? 0;
+      return idA - idB;
+    });
 
-    this.selectedResult = result;
+    // Construir la vista de tabla dinámica para cada respuesta (si aplica)
+    sortedAnswers.forEach((ans: Answer) => {
+      ans.dynamicTableView = this.buildDynamicTableView(ans);
+    });
+
+    // Usar una copia del resultado con las respuestas ya ordenadas
+    this.selectedResult = {
+      ...result,
+      answers: sortedAnswers
+    };
     this.modal
       .open(content, { size: 'lg', ariaLabelledBy: 'modal-basic-title' })
       .result.then(
