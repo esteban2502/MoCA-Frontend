@@ -19,6 +19,7 @@ interface LocalAnswer {
   userAnswer: string;
   score: number | null;
   notes: string;
+  dynamicTableResponse?: string;
 }
 
 @Component({
@@ -63,6 +64,13 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
   private lastY = 0;
   drawingTool: 'pen' | 'eraser' = 'pen';
   private lineWidth = 3;
+  /** Imagen de fondo en memoria para poder redibujarla al limpiar (X) sin perderla. */
+  private backgroundImageDataUrl: string | null = null;
+
+  // Tabla dinámica (configuración y selección actual)
+  dynamicTableColumns: string[] = [];
+  dynamicTableRows: string[] = [];
+  dynamicTableSelection: { [key: string]: boolean } = {};
 
   // Patient selection
   selectedPatient: Patient | null = null;
@@ -75,7 +83,10 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
   registrationForm = {
     fullName: '',
     idNumber: '',
-    birthDate: ''
+    birthDate: '',
+    sex: '',
+    educationLevel: '',
+    sexOtherDescription: ''
   };
   
   // Login form (documentNumber)
@@ -132,10 +143,27 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
         
         this.totalQuestions = this.questions.length;
         this.currentQuestion = this.questions[0];
+        this.backgroundImageDataUrl = null;
         this.currentQuestionNumber = 1;
         
         // Inicializar respuestas
         this.initializeAnswers();
+
+        // Inicializar tabla dinámica (si la primera pregunta la tiene)
+        this.initializeDynamicTableState(null);
+
+        // Si la primera pregunta es de dibujo, inicializar el lienzo una vez que la vista esté lista
+        if (this.currentQuestion.isDrawing) {
+          setTimeout(() => {
+            if (this.drawingCanvas && this.currentQuestion?.isDrawing) {
+              this.initializeCanvas();
+              // Si hubiera una respuesta previa guardada (caso futuro), cargarla
+              if (this.userAnswer) {
+                this.loadDrawingFromAnswer();
+              }
+            }
+          }, 300);
+        }
       }
     }).catch(error => {
       console.error('Error cargando datos:', error);
@@ -150,7 +178,8 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       questionId: q.id!,
       userAnswer: '',
       score: null,
-      notes: ''
+      notes: '',
+      dynamicTableResponse: ''
     }));
   }
 
@@ -176,6 +205,7 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
 
   loadQuestion(): void {
     this.currentQuestion = this.questions[this.currentQuestionIndex];
+    this.backgroundImageDataUrl = null;
     this.currentQuestionNumber = this.currentQuestionIndex + 1;
     
     // Reset warning state
@@ -187,10 +217,23 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       this.userAnswer = savedAnswer.userAnswer;
       this.evaluationScore = savedAnswer.score;
       this.evaluationNotes = savedAnswer.notes;
+      this.initializeDynamicTableState(savedAnswer.dynamicTableResponse || null);
     } else {
       this.userAnswer = '';
-      this.evaluationScore = null;
       this.evaluationNotes = '';
+      this.initializeDynamicTableState(null);
+      // En preguntas con tabla dinámica, puntaje inicial = número de checks, respetando máximo (0 = no sumar)
+      if (this.currentQuestion.dynamicTableConfig) {
+        const max = this.maxScore;
+        if (max === 0) {
+          this.evaluationScore = 0;
+        } else {
+          const count = Object.values(this.dynamicTableSelection).filter(v => v === true).length;
+          this.evaluationScore = Math.min(count, max);
+        }
+      } else {
+        this.evaluationScore = null;
+      }
     }
     
     // Initialize canvas for drawing questions
@@ -224,10 +267,61 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       this.answers[answerIndex] = {
         questionId: this.currentQuestion.id!,
         userAnswer: this.userAnswer,
+        dynamicTableResponse: this.currentQuestion.dynamicTableConfig
+          ? JSON.stringify(this.dynamicTableSelection)
+          : '',
         score: this.evaluationScore,
         notes: this.evaluationNotes
       };
     }
+  }
+
+  /** Inicializa columnas/filas y selección de tabla dinámica para la pregunta actual. */
+  private initializeDynamicTableState(savedResponseJson: string | null): void {
+    this.dynamicTableColumns = [];
+    this.dynamicTableRows = [];
+    this.dynamicTableSelection = {};
+
+    if (!this.currentQuestion?.dynamicTableConfig) {
+      return;
+    }
+
+    try {
+      const config = JSON.parse(this.currentQuestion.dynamicTableConfig);
+      this.dynamicTableColumns = Array.isArray(config.columns) ? config.columns.slice() : [];
+      this.dynamicTableRows = Array.isArray(config.rows) ? config.rows.slice() : [];
+    } catch (e) {
+      console.error('Error parseando dynamicTableConfig:', e);
+      this.dynamicTableColumns = [];
+      this.dynamicTableRows = [];
+    }
+
+    if (savedResponseJson) {
+      try {
+        const parsed = JSON.parse(savedResponseJson);
+        if (parsed && typeof parsed === 'object') {
+          this.dynamicTableSelection = parsed;
+        }
+      } catch (e) {
+        console.error('Error parseando dynamicTableResponse:', e);
+        this.dynamicTableSelection = {};
+      }
+    }
+  }
+
+  onDynamicTableCheckboxChange(rowIndex: number, colIndex: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const key = `${rowIndex}-${colIndex}`;
+    this.dynamicTableSelection[key] = input.checked;
+    const max = this.maxScore;
+    // Si puntaje máximo es 0, los checkboxes no suman puntos
+    if (max === 0) {
+      this.evaluationScore = 0;
+      return;
+    }
+    // 1 checkbox = 1 punto, sin superar el máximo de la pregunta
+    const checkedCount = Object.values(this.dynamicTableSelection).filter(v => v === true).length;
+    this.evaluationScore = Math.min(checkedCount, max);
   }
 
   submitAnswer(): void {
@@ -262,6 +356,7 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
         answers: this.answers.map(localAnswer => ({
           questionId: localAnswer.questionId,
           userAnswer: localAnswer.userAnswer,
+          dynamicTableResponse: localAnswer.dynamicTableResponse ?? '',
           score: localAnswer.score,
           notes: localAnswer.notes
         })),
@@ -300,7 +395,8 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
 
   // Getters para el template
   get maxScore(): number {
-    return this.currentQuestion?.maxScore || 10;
+    const ms = this.currentQuestion?.maxScore;
+    return ms ?? 10;
   }
 
   // Manejar input en tiempo real
@@ -346,7 +442,10 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
     this.registrationForm = {
       fullName: '',
       idNumber: '',
-      birthDate: ''
+      birthDate: '',
+      sex: '',
+      educationLevel: '',
+      sexOtherDescription: ''
     };
     this.loginForm = {
       idNumber: ''
@@ -376,8 +475,7 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
   }
 
   async registerUser(): Promise<void> {
-    if (!this.registrationForm.fullName.trim() || !this.registrationForm.idNumber.trim()) {
-      this.errorMessage = 'Nombre y cédula son requeridos';
+    if (!this.validateRegistrationForm()) {
       return;
     }
 
@@ -388,14 +486,27 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
       const patient = await firstValueFrom(this.patientService.create({
         fullName: this.registrationForm.fullName,
         documentNumber: this.registrationForm.idNumber,
-        birthDate: this.registrationForm.birthDate
+        birthDate: this.registrationForm.birthDate,
+        sex: this.registrationForm.sex,
+        educationLevel: this.registrationForm.educationLevel,
+        sexOtherDescription: this.registrationForm.sex === 'Otro'
+          ? (this.registrationForm.sexOtherDescription || '').trim()
+          : undefined
       }));
       this.selectedPatient = patient;
       this.showUserForm = false;
       this.loadTestData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error registrando paciente:', error);
-      this.errorMessage = 'Error al registrar paciente. Intente nuevamente.';
+      if (error?.status === 400 || error?.status === 409) {
+        if (typeof error.error === 'string' && error.error.trim().length > 0) {
+          this.errorMessage = error.error;
+        } else {
+          this.errorMessage = 'Error al registrar paciente. Verifique los datos ingresados.';
+        }
+      } else {
+        this.errorMessage = 'Error al registrar paciente. Intente nuevamente.';
+      }
     } finally {
       this.isLoading = false;
     }
@@ -413,6 +524,25 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
     if (!this.registrationForm.birthDate) {
       this.errorMessage = 'La fecha de nacimiento es requerida';
       return false;
+    }
+    if (!this.registrationForm.sex) {
+      this.errorMessage = 'El sexo es requerido';
+      return false;
+    }
+    if (!this.registrationForm.educationLevel) {
+      this.errorMessage = 'El nivel de educación es requerido';
+      return false;
+    }
+    if (this.registrationForm.sex === 'Otro') {
+      const other = (this.registrationForm.sexOtherDescription || '').trim();
+      if (!other) {
+        this.errorMessage = 'Debe especificar el sexo en la opción "Otro".';
+        return false;
+      }
+      if (other.length > 35) {
+        this.errorMessage = 'La descripción de "Otro" no puede superar los 35 caracteres.';
+        return false;
+      }
     }
     return true;
   }
@@ -468,12 +598,69 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
     this.canvasContext.lineJoin = 'round';
     this.canvasContext.globalCompositeOperation = 'source-over';
     
-    // Set white background
+    // Fondo: blanco y luego imagen de fondo si existe (dibujar sobre una imagen)
     this.canvasContext.fillStyle = '#ffffff';
     this.canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Asegurar que el tool esté configurado correctamente
-    this.setDrawingTool(this.drawingTool);
+    this.drawBackgroundImageOnCanvas(() => this.setDrawingTool(this.drawingTool));
+  }
+
+  /** Dibuja la imagen de fondo en el canvas (ocupa el mayor espacio sin perder proporciones). Guarda la URL en memoria para poder redibujar al limpiar. */
+  private drawBackgroundImageOnCanvas(callback?: () => void): void {
+    if (!this.currentQuestion?.backgroundImage || !this.canvasContext || !this.drawingCanvas) {
+      callback?.();
+      return;
+    }
+    this.backgroundImageDataUrl = this.currentQuestion.backgroundImage;
+    const img = new Image();
+    img.onload = () => {
+      if (!this.canvasContext || !this.drawingCanvas) {
+        callback?.();
+        return;
+      }
+      const canvas = this.drawingCanvas.nativeElement;
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const scale = Math.min(cw / iw, ch / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
+      const dx = (cw - dw) / 2;
+      const dy = (ch - dh) / 2;
+      this.canvasContext.drawImage(img, dx, dy, dw, dh);
+      callback?.();
+    };
+    img.onerror = () => callback?.();
+    img.src = this.currentQuestion.backgroundImage;
+  }
+
+  /** Redibuja la imagen de fondo guardada en memoria (para usar al pulsar X y mantener el fondo). */
+  private redrawStoredBackgroundImage(callback?: () => void): void {
+    if (!this.backgroundImageDataUrl || !this.canvasContext || !this.drawingCanvas) {
+      callback?.();
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      if (!this.canvasContext || !this.drawingCanvas) {
+        callback?.();
+        return;
+      }
+      const canvas = this.drawingCanvas.nativeElement;
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const scale = Math.min(cw / iw, ch / ih);
+      const dw = iw * scale;
+      const dh = ih * scale;
+      const dx = (cw - dw) / 2;
+      const dy = (ch - dh) / 2;
+      this.canvasContext.drawImage(img, dx, dy, dw, dh);
+      callback?.();
+    };
+    img.onerror = () => callback?.();
+    img.src = this.backgroundImageDataUrl;
   }
 
   startDrawing(event: MouseEvent): void {
@@ -625,10 +812,17 @@ export class MocaTestComponent implements OnInit, AfterViewInit {
 
   clearCanvas(): void {
     if (!this.canvasContext || !this.drawingCanvas) return;
-    
     const canvas = this.drawingCanvas.nativeElement;
+    // Usar siempre modo normal (lápiz) para que el relleno y la imagen se pinten bien,
+    // sin importar si en ese momento está seleccionado el borrador (destination-out).
+    this.canvasContext.globalCompositeOperation = 'source-over';
     this.canvasContext.fillStyle = '#ffffff';
     this.canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+    if (this.backgroundImageDataUrl) {
+      this.redrawStoredBackgroundImage(() => this.setDrawingTool(this.drawingTool));
+    } else {
+      this.drawBackgroundImageOnCanvas(() => this.setDrawingTool(this.drawingTool));
+    }
     this.userAnswer = '';
   }
 

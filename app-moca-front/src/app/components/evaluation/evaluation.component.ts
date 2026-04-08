@@ -8,6 +8,7 @@ import { TestService } from '../../services/test.service';
 import { ResultService } from '../../services/result.service';
 import { Test } from '../../models/Test';
 import { Result } from '../../models/Result';
+import { Answer } from '../../models/Answer';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { NgxPaginationModule } from 'ngx-pagination';
 
@@ -102,14 +103,30 @@ export class EvaluationComponent implements OnInit {
   }
 
   viewResult(content: any, result: Result) {
-    console.log('Resultado seleccionado:', result);
-    console.log('Answers del resultado:', result.answers);
-    if (result.answers && result.answers.length > 0) {
-      console.log('Primera respuesta:', result.answers[0]);
-      console.log('Question de la primera respuesta:', result.answers[0].question);
-    }
-    
-    this.selectedResult = result;
+    // Ordenar las respuestas según el orden de la pregunta en la prueba
+    const sortedAnswers: Answer[] = (result.answers || []).slice().sort((a, b) => {
+      const qa = a.question;
+      const qb = b.question;
+      const orderA = qa?.questionOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = qb?.questionOrder ?? Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      const idA = qa?.id ?? 0;
+      const idB = qb?.id ?? 0;
+      return idA - idB;
+    });
+
+    // Construir la vista de tabla dinámica para cada respuesta (si aplica)
+    sortedAnswers.forEach((ans: Answer) => {
+      ans.dynamicTableView = this.buildDynamicTableView(ans);
+    });
+
+    // Usar una copia del resultado con las respuestas ya ordenadas
+    this.selectedResult = {
+      ...result,
+      answers: sortedAnswers
+    };
     this.modal
       .open(content, { size: 'lg', ariaLabelledBy: 'modal-basic-title' })
       .result.then(
@@ -122,6 +139,42 @@ export class EvaluationComponent implements OnInit {
           this.selectedResult = null;
         }
       );
+  }
+
+  /** Construye un objeto de vista para la tabla dinámica (columnas, filas y celdas marcadas). */
+  private buildDynamicTableView(answer: Answer): { columns: string[]; rows: string[]; selection: { [key: string]: boolean } } | null {
+    const question = answer.question;
+    if (!question || !question.dynamicTableConfig) {
+      return null;
+    }
+
+    let columns: string[] = [];
+    let rows: string[] = [];
+    try {
+      const cfg = JSON.parse(question.dynamicTableConfig);
+      columns = Array.isArray(cfg.columns) ? cfg.columns.slice() : [];
+      rows = Array.isArray(cfg.rows) ? cfg.rows.slice() : [];
+    } catch (e) {
+      console.error('Error parseando dynamicTableConfig en evaluación:', e);
+      return null;
+    }
+
+    const selection: { [key: string]: boolean } = {};
+    if (answer.dynamicTableResponse) {
+      try {
+        const parsed = JSON.parse(answer.dynamicTableResponse);
+        if (parsed && typeof parsed === 'object') {
+          for (const key of Object.keys(parsed)) {
+            const v = parsed[key];
+            selection[key] = v === true || v === 'true' || v === 1;
+          }
+        }
+      } catch (e) {
+        console.error('Error parseando dynamicTableResponse en evaluación:', e);
+      }
+    }
+
+    return { columns, rows, selection };
   }
 
   deleteResult(resultId: number) {

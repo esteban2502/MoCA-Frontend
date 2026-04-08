@@ -3,6 +3,9 @@ export interface Patient {
   documentNumber: string;
   fullName: string;
   birthDate?: string;
+  sex?: string;
+  sexOtherDescription?: string;
+  educationLevel?: string;
   psychologists?: {
     id: number;
     fullName: string;

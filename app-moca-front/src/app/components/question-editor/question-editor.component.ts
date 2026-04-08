@@ -40,7 +40,18 @@ export class QuestionEditorComponent implements OnInit {
   mode: 'create' | 'edit' = 'create';
   errorMessage: string = '';
   deleteErrorMessage: string = '';
+  /** Opción única: ninguna, dibujar, imagen de apoyo o dibujar sobre imagen */
+  questionOption: 'none' | 'drawing' | 'supportImage' | 'drawOnImage' = 'none';
   @ViewChild('errorAlertModal') errorAlertModal!: TemplateRef<any>;
+
+  // Configuración de tabla dinámica
+  dynamicTableColumns: string[] = [];
+  dynamicTableRows: string[] = [];
+
+  /** trackBy por índice para que los inputs de encabezados no pierdan foco al escribir */
+  trackByIndex(index: number): number {
+    return index;
+  }
 
   constructor(
     private modal: NgbModal,
@@ -69,14 +80,27 @@ export class QuestionEditorComponent implements OnInit {
   }
 
   open(content: any, question?: Question) {
-    this.errorMessage = ''; // Limpiar mensaje de error
+    this.errorMessage = '';
     if (question && question.id) {
       this.idAux = question.id;
       this.newQuestion = { ...question };
+      if (question.backgroundImage && question.isDrawing) {
+        this.questionOption = 'drawOnImage';
+      } else if (question.supportImage) {
+        this.questionOption = 'supportImage';
+      } else if (question.isDrawing) {
+        this.questionOption = 'drawing';
+      } else {
+        this.questionOption = 'none';
+      }
       this.mode = 'edit';
+
+      // Cargar configuración de tabla dinámica si existe
+      this.loadDynamicTableConfigFromQuestion();
     } else {
       this.mode = 'create';
       this.idAux = 0;
+      this.questionOption = 'none';
       this.newQuestion = {
         question: '',
         description: '',
@@ -85,8 +109,13 @@ export class QuestionEditorComponent implements OnInit {
         isDrawing: false,
         status: true,
         test: { id: this.testId },
-        category: { id: 0 }
+        category: { id: 0 },
+        supportImage: undefined,
+        backgroundImage: undefined,
+        dynamicTableConfig: undefined
       };
+      this.dynamicTableColumns = [];
+      this.dynamicTableRows = [];
     }
 
     this.modal
@@ -114,9 +143,21 @@ export class QuestionEditorComponent implements OnInit {
 
   createQuestion(): void {
     this.errorMessage = ''; // Limpiar mensaje de error previo
-    
+
+    // Validación básica en el front: categoría obligatoria
+    if (
+      !this.newQuestion.category ||
+      this.newQuestion.category.id == null ||
+      this.newQuestion.category.id <= 0
+    ) {
+      this.errorMessage = 'Debe elegir una categoría para poder crear la pregunta.';
+      return;
+    }
+
     if (this.mode === 'create') {
       this.newQuestion.test.id = this.testId;
+      // Sincronizar configuración de tabla dinámica antes de enviar
+      this.updateDynamicTableConfigOnQuestion();
       this.questionService.create(this.newQuestion).subscribe({
         next: () => {
           this.getAllQuestions();
@@ -125,14 +166,23 @@ export class QuestionEditorComponent implements OnInit {
             description: '',
             questionOrder: 1,
             maxScore: 1,
+            isDrawing: false,
+            status: true,
             test: { id: this.testId },
-            category: { id: 0 }
+            category: { id: 0 },
+            supportImage: undefined,
+            backgroundImage: undefined,
+            dynamicTableConfig: undefined
           };
+          this.questionOption = 'none';
           this.modal.dismissAll();
         },
         error: (err) => {
           if (err.status === 409) {
             this.errorMessage = err.error || 'Ya existe una pregunta con este orden en el examen';
+          } else if (err.status === 400 && typeof err.error === 'string' && err.error.trim().length > 0) {
+            // Mensajes de validación específicos desde el backend (por ejemplo, categoría requerida)
+            this.errorMessage = err.error;
           } else {
             console.error('Error al crear pregunta:', err);
             this.errorMessage = 'Error al crear la pregunta';
@@ -140,6 +190,8 @@ export class QuestionEditorComponent implements OnInit {
         },
       });
     } else if (this.mode === 'edit' && this.idAux) {
+      // Sincronizar configuración de tabla dinámica antes de actualizar
+      this.updateDynamicTableConfigOnQuestion();
       this.questionService.update(this.idAux, this.newQuestion).subscribe({
         next: () => {
           this.getAllQuestions();
@@ -148,9 +200,15 @@ export class QuestionEditorComponent implements OnInit {
             description: '',
             questionOrder: 1,
             maxScore: 1,
+            isDrawing: false,
+            status: true,
             test: { id: this.testId },
-            category: { id: 0 }
+            category: { id: 0 },
+            supportImage: undefined,
+            backgroundImage: undefined,
+            dynamicTableConfig: undefined
           };
+          this.questionOption = 'none';
           this.idAux = 0;
           this.modal.dismissAll();
         },
@@ -199,6 +257,97 @@ export class QuestionEditorComponent implements OnInit {
         console.error('Error cambiando estado de pregunta:', err);
       },
     });
+  }
+
+  onQuestionOptionChange(opt: 'none' | 'drawing' | 'supportImage' | 'drawOnImage'): void {
+    this.questionOption = opt;
+    this.newQuestion.isDrawing = opt === 'drawing' || opt === 'drawOnImage';
+    if (opt !== 'supportImage') {
+      this.newQuestion.supportImage = undefined;
+    }
+    if (opt !== 'drawOnImage') {
+      this.newQuestion.backgroundImage = undefined;
+    }
+  }
+
+  // Tabla dinámica: helpers para cargar y guardar configuración
+  private loadDynamicTableConfigFromQuestion(): void {
+    this.dynamicTableColumns = [];
+    this.dynamicTableRows = [];
+    if (!this.newQuestion.dynamicTableConfig) {
+      return;
+    }
+    try {
+      const cfg = JSON.parse(this.newQuestion.dynamicTableConfig);
+      this.dynamicTableColumns = Array.isArray(cfg.columns) ? cfg.columns.slice() : [];
+      this.dynamicTableRows = Array.isArray(cfg.rows) ? cfg.rows.slice() : [];
+    } catch (e) {
+      console.error('Error parseando dynamicTableConfig en editor:', e);
+      this.dynamicTableColumns = [];
+      this.dynamicTableRows = [];
+    }
+  }
+
+  updateDynamicTableConfigOnQuestion(): void {
+    if (this.dynamicTableColumns.length === 0 && this.dynamicTableRows.length === 0) {
+      this.newQuestion.dynamicTableConfig = undefined;
+      return;
+    }
+    const cfg = {
+      columns: this.dynamicTableColumns,
+      rows: this.dynamicTableRows,
+    };
+    this.newQuestion.dynamicTableConfig = JSON.stringify(cfg);
+  }
+
+  addDynamicColumn(): void {
+    this.dynamicTableColumns.push(`Columna ${this.dynamicTableColumns.length + 1}`);
+    this.updateDynamicTableConfigOnQuestion();
+  }
+
+  removeDynamicColumn(index: number): void {
+    this.dynamicTableColumns.splice(index, 1);
+    this.updateDynamicTableConfigOnQuestion();
+  }
+
+  addDynamicRow(): void {
+    this.dynamicTableRows.push(`Fila ${this.dynamicTableRows.length + 1}`);
+    this.updateDynamicTableConfigOnQuestion();
+  }
+
+  removeDynamicRow(index: number): void {
+    this.dynamicTableRows.splice(index, 1);
+    this.updateDynamicTableConfigOnQuestion();
+  }
+
+  onSupportImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.newQuestion.supportImage = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearSupportImage(): void {
+    this.newQuestion.supportImage = undefined;
+  }
+
+  onBackgroundImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.newQuestion.backgroundImage = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearBackgroundImage(): void {
+    this.newQuestion.backgroundImage = undefined;
   }
 
   private extractErrorMessage(err: any): string {

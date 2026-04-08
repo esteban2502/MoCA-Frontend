@@ -40,3 +40,102 @@
     vertical-align: middle;
   }
 }
+
+/* Editor de tabla dinámica: grupos (columnas / filas) + vista previa */
+.dynamic-table-editor-block {
+  border: 1px solid rgba(0, 128, 78, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  background: rgba(0, 128, 78, 0.04);
+}
+
+.dynamic-table-group {
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #dee2e6;
+}
+
+.dynamic-table-group-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #00804e;
+  margin-bottom: 0.5rem;
+}
+
+.dynamic-table-input-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dynamic-table-input-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dynamic-table-input-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0;
+}
+
+.dynamic-table-input-item .form-control {
+  max-width: 100%;
+}
+
+.dynamic-table-preview-wrap {
+  width: 100%;
+  overflow-x: auto;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.dynamic-table-preview {
+  margin-bottom: 0;
+  font-size: 0.8rem;
+}
+
+.dynamic-table-preview th,
+.dynamic-table-preview td {
+  padding: 0.35rem 0.5rem;
+  white-space: nowrap;
+}
+
+.dynamic-table-preview-corner {
+  width: 28px;
+  min-width: 28px;
+  background: #f8f9fa;
+}
+
+.dynamic-table-preview-header {
+  background: rgba(0, 128, 78, 0.08);
+  font-weight: 600;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dynamic-table-preview-row-label {
+  background: rgba(0, 128, 78, 0.06);
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dynamic-table-preview td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Checkboxes de vista previa de tabla dinámica ~65% más grandes */
+.dynamic-table-checkbox {
+  width: 1.65rem;
+  height: 1.65rem;
+  min-width: 1.65rem;
+  min-height: 1.65rem;
+  accent-color: #00804e;
+}
